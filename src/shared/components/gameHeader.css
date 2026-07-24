@@ -1,0 +1,33 @@
+.game-header {
+  width: min(100%, 720px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  z-index: 1;
+}
+
+.game-header-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-title);
+  text-align: center;
+}
+
+.game-header-back,
+.game-header-reset {
+  border: none;
+  background: rgb(255 255 255 / 0.75);
+  border-radius: 999px;
+  padding: 0.45rem 0.85rem;
+  font-weight: 700;
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+
+.game-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-shrink: 0;
+}

@@ -1,0 +1,38 @@
+.burst-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none !important;
+  overflow: visible;
+  z-index: 1;
+}
+
+.burst-layer * {
+  pointer-events: none !important;
+}
+
+.burst-particle {
+  position: absolute;
+  left: 50%;
+  top: 45%;
+  width: var(--size);
+  height: var(--size);
+  margin-left: calc(var(--size) / -2);
+  margin-top: calc(var(--size) / -2);
+  border-radius: 40% 60% 55% 45%;
+  background: hsl(var(--hue) 90% 62%);
+  box-shadow: 0 0 12px hsl(var(--hue) 90% 70% / 0.7);
+  opacity: 1;
+  animation-name: flingAway;
+  animation-timing-function: var(--spring-soft, ease-out);
+  animation-fill-mode: forwards;
+}
+
+@keyframes flingAway {
+  to {
+    transform: translate(
+      calc(cos(var(--angle)) * var(--distance)),
+      calc(sin(var(--angle)) * var(--distance))
+    );
+    opacity: 0;
+  }
+}

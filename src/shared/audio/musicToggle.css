@@ -1,0 +1,14 @@
+.music-toggle {
+  border: none;
+  background: rgb(255 255 255 / 0.75);
+  border-radius: 999px;
+  padding: 0.45rem 0.85rem;
+  font-weight: 700;
+  font-size: var(--text-sm);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.music-toggle[aria-pressed='false'] {
+  opacity: 0.72;
+}

@@ -1,0 +1,48 @@
+.number-pad {
+  position: relative;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
+  width: min(100%, 320px);
+  touch-action: manipulation;
+}
+
+.pad-key {
+  position: relative;
+  z-index: 10;
+  min-height: var(--touch-min);
+  border: none;
+  border-radius: var(--radius-btn);
+  background: color-mix(in srgb, var(--panel, #fff) 92%, #000 8%);
+  color: var(--ink, #1a1a1a);
+  font-family: var(--font-display);
+  font-size: var(--text-pad);
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 0 color-mix(in srgb, var(--ink, #1a1a1a) 18%, transparent);
+  transition: transform var(--spring-snappy-time) var(--spring-snappy),
+    box-shadow 160ms ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.pad-key:active:not(:disabled) {
+  transform: translateY(3px) scale(0.97);
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--ink, #1a1a1a) 18%, transparent);
+}
+
+.pad-go {
+  background: var(--accent, #2ecc71);
+  color: #fff;
+}
+
+.pad-clear {
+  font-size: var(--text-lg);
+}
+
+.pad-key:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

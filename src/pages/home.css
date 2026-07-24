@@ -1,0 +1,230 @@
+.home-shell {
+  min-height: 100dvh;
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  color: #1f2a24;
+  background:
+    linear-gradient(135deg, #1a3a4a 0%, #2d6a4f 42%, #d4a373 100%);
+}
+
+.home-glow {
+  position: absolute;
+  inset: -20%;
+  background:
+    radial-gradient(circle at 30% 40%, rgb(255 214 120 / 0.35), transparent 40%),
+    radial-gradient(circle at 75% 30%, rgb(255 140 180 / 0.28), transparent 35%);
+  animation: homePulse 7s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+.home-composition {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 720px);
+  text-align: center;
+  animation: homeEnter 700ms var(--spring-soft, ease-out) both;
+}
+
+.home-brand {
+  margin: 0 0 0.35rem;
+  font-family: var(--font-display);
+  font-size: var(--text-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #fff8e7;
+  text-shadow: 0 4px 24px rgb(0 0 0 / 0.25);
+}
+
+.home-headline {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-title);
+  font-weight: 600;
+  color: #f0fff4;
+}
+
+.home-sub {
+  margin: 0.65rem auto 1.75rem;
+  max-width: 34ch;
+  color: rgb(255 255 255 / 0.88);
+  font-size: var(--text-md);
+  line-height: 1.45;
+}
+
+.home-fox-banner {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin: 0 auto 1.35rem;
+  padding: 0.35rem 0.85rem 0.35rem 0.35rem;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.18);
+  color: #fff8e7;
+  font-weight: 700;
+  font-size: 0.9rem;
+  backdrop-filter: blur(6px);
+}
+
+.home-actions {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 720px) {
+  .home-actions {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .typing-cta {
+    grid-column: 1 / -1;
+  }
+}
+
+.home-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  min-height: 180px;
+  padding: 1.15rem 1.2rem;
+  border-radius: 24px;
+  text-align: left;
+  transition: transform var(--spring-snappy-time) var(--spring-snappy),
+    box-shadow 200ms ease;
+  box-shadow: var(--shadow-soft);
+}
+
+.cta-art {
+  align-self: center;
+  margin-bottom: 0.25rem;
+}
+
+.cta-art-pets {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.15rem;
+}
+
+.cta-art-keyboard {
+  display: grid;
+  place-items: center;
+}
+
+.home-keyboard {
+  display: block;
+  filter: drop-shadow(0 6px 0 rgb(0 0 0 / 0.12));
+  animation: keyboardBounce 2.4s ease-in-out infinite;
+}
+
+.home-key {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.typing-cta:hover .home-keyboard,
+.typing-cta:focus-visible .home-keyboard {
+  animation: keyboardPop 420ms var(--spring-snappy, ease-out);
+}
+
+@keyframes keyboardBounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes keyboardPop {
+  from {
+    transform: scale(0.94) rotate(-2deg);
+  }
+  50% {
+    transform: scale(1.06) rotate(2deg);
+  }
+  to {
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-keyboard {
+    animation: none;
+  }
+}
+
+.home-cta:hover,
+.home-cta:focus-visible {
+  transform: translateY(-4px) scale(1.02);
+  outline: none;
+}
+
+.race-cta {
+  background:
+    linear-gradient(160deg, #ffb347 0%, #ff7a18 100%);
+  color: #1b2430;
+}
+
+.academy-cta {
+  background:
+    linear-gradient(160deg, #ffb6d9 0%, #c9a0ff 100%);
+  color: #3d2548;
+}
+
+.typing-cta {
+  background:
+    linear-gradient(160deg, #5eead4 0%, #2a9d8f 100%);
+  color: #083344;
+  min-height: 140px;
+}
+
+.cta-kicker {
+  font-size: var(--text-xs);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.75;
+  font-weight: 700;
+}
+
+.cta-title {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.cta-copy {
+  font-size: var(--text-sm);
+  opacity: 0.9;
+}
+
+@keyframes homeEnter {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes homePulse {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.06);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-glow,
+  .home-composition {
+    animation: none;
+  }
+}
