@@ -19,6 +19,8 @@ export interface Problem {
   operands?: number[]
   /** When set, UI shows icon groups instead of crowded noun words */
   visualIcon?: ProblemIcon
+  /** Stack operands (e.g. bigger multiplications) */
+  layout?: 'horizontal' | 'vertical'
 }
 
 export interface AdaptiveState {

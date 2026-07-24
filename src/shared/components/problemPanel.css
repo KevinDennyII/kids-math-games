@@ -23,6 +23,45 @@
   min-height: 2.6rem;
 }
 
+.problem-prompt-vertical {
+  display: grid;
+  justify-items: end;
+  width: fit-content;
+  margin-inline: auto;
+  gap: 0.1rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+}
+
+.vert-row {
+  display: block;
+  min-width: 3.2ch;
+  text-align: right;
+  line-height: 1.05;
+}
+
+.vert-times {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  column-gap: 0.45rem;
+  min-width: 3.2ch;
+}
+
+.vert-op {
+  justify-self: start;
+}
+
+.vert-rule {
+  display: block;
+  width: 100%;
+  height: 3px;
+  margin-top: 0.15rem;
+  border-radius: 999px;
+  background: currentColor;
+  opacity: 0.55;
+}
+
 .prompt-icons {
   display: inline-flex;
   flex-wrap: wrap;

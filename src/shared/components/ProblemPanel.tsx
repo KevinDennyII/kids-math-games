@@ -48,7 +48,31 @@ function IconGroup({
   )
 }
 
+function VerticalMultiply({ problem }: { problem: Problem }) {
+  const [top = 0, bottom = 0] = problem.operands ?? []
+  return (
+    <div className="problem-prompt problem-prompt-vertical" aria-label={problem.prompt}>
+      <span className="vert-row vert-top">{top}</span>
+      <span className="vert-row vert-times">
+        <span className="vert-op" aria-hidden="true">
+          ×
+        </span>
+        <span>{bottom}</span>
+      </span>
+      <span className="vert-rule" aria-hidden="true" />
+    </div>
+  )
+}
+
 function VisualPrompt({ problem }: { problem: Problem }) {
+  if (
+    problem.layout === 'vertical' &&
+    problem.type === 'multiplication' &&
+    problem.operands?.length === 2
+  ) {
+    return <VerticalMultiply problem={problem} />
+  }
+
   const icon = problem.visualIcon
   const [left = 0, right = 0] = problem.operands ?? []
   if (!icon || problem.type !== 'word-addition') {

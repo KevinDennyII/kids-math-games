@@ -35,6 +35,7 @@ export function generateRaceProblem(level: number): Problem {
       answer: a * b,
       hint: `${a} × ${b} = (${a - (a % 10)} × ${b}) + (${a % 10} × ${b})`,
       operands: [a, b],
+      layout: 'vertical',
     }
   }
 

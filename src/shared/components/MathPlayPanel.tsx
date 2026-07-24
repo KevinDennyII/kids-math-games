@@ -3,6 +3,7 @@ import { BurstParticles } from '../motion/BurstParticles'
 import { ScorePop } from '../motion/ScorePop'
 import { NumberPad } from './NumberPad'
 import { ProblemPanel } from './ProblemPanel'
+import { ScratchPad } from './ScratchPad'
 
 type Props = {
   className: string
@@ -19,6 +20,8 @@ type Props = {
   burstKey: number
   popPoints: number | null
   popKey: number
+  /** Show a draw-to-think pad (bigger race problems) */
+  showScratchPad?: boolean
 }
 
 /** Shared problem + pad panel used by both math games. */
@@ -37,6 +40,7 @@ export function MathPlayPanel({
   burstKey,
   popPoints,
   popKey,
+  showScratchPad = false,
 }: Props) {
   return (
     <section className={className}>
@@ -51,6 +55,9 @@ export function MathPlayPanel({
         hint={hint}
         disabled={locked}
       />
+      {showScratchPad ? (
+        <ScratchPad resetKey={problem.id} disabled={locked} />
+      ) : null}
       {banner ? <p className={bannerClassName}>{banner}</p> : null}
       <NumberPad
         value={value}

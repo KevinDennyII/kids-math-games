@@ -43,15 +43,15 @@ export function RaceGame() {
       <StreakBar state={game.state} softTimerSeconds={15} />
 
       <div className="race-stage" aria-hidden="true">
-        <div className="race-fox-cheer">
+        <div className="race-buddy-cheer">
           <CharacterSprite
-            src={SPRITES.fox}
+            src={SPRITES.bunny}
             alt=""
             size="md"
             motion="hop"
             celebrate={game.celebrating}
           />
-          <span className="race-fox-label">Fox friend</span>
+          <span className="race-buddy-label">Zap buddy</span>
         </div>
 
         <div className="race-track">
@@ -105,6 +105,9 @@ export function RaceGame() {
         burstKey={game.burstKey}
         popPoints={game.popPoints}
         popKey={game.popKey}
+        showScratchPad={
+          game.problem.layout === 'vertical' || game.problem.type === 'fraction'
+        }
       />
     </main>
   )

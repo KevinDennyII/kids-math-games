@@ -71,7 +71,7 @@
   gap: 0.65rem;
 }
 
-.race-fox-cheer {
+.race-buddy-cheer {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -79,7 +79,7 @@
   margin-bottom: 0.4rem;
 }
 
-.race-fox-label {
+.race-buddy-label {
   font-size: 0.7rem;
   font-weight: 700;
   opacity: 0.75;
@@ -236,7 +236,7 @@
     justify-items: center;
   }
 
-  .race-fox-cheer {
+  .race-buddy-cheer {
     flex-direction: row;
     gap: 0.5rem;
     margin-bottom: 0;
