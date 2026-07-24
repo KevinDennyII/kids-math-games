@@ -1,0 +1,285 @@
+.typing-keyboard {
+  z-index: 2;
+  width: min(100%, 720px);
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.45rem 0.5rem 0.5rem;
+  border-radius: 18px;
+  background: rgb(15 23 36 / 0.72);
+  border: 2px solid rgb(255 255 255 / 0.22);
+  box-shadow: 0 8px 0 rgb(0 0 0 / 0.18);
+  backdrop-filter: blur(6px);
+}
+
+.tk-board {
+  display: flex;
+  flex-direction: column;
+  gap: 0.28rem;
+  align-items: center;
+}
+
+.tk-row {
+  display: flex;
+  justify-content: center;
+  gap: 0.28rem;
+  width: 100%;
+  padding-left: var(--tk-offset, 0);
+}
+
+.tk-row-space {
+  padding-left: 0;
+  margin-top: 0.1rem;
+}
+
+.tk-key {
+  --tk-color: #64748b;
+  position: relative;
+  flex: 1 1 0;
+  max-width: 2.85rem;
+  aspect-ratio: 1 / 1;
+  min-height: 0;
+  border: 2px solid rgb(0 0 0 / 0.35);
+  border-radius: 8px;
+  background: var(--tk-color);
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: clamp(0.72rem, 2.2vw, 0.95rem);
+  font-weight: 700;
+  line-height: 1;
+  cursor: default;
+  box-shadow: 0 3px 0 rgb(0 0 0 / 0.28);
+  transition:
+    transform 100ms ease,
+    box-shadow 100ms ease,
+    filter 120ms ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+  padding: 0;
+}
+
+.tk-key:not(:disabled) {
+  cursor: pointer;
+}
+
+.tk-key:not(:disabled):active,
+.tk-key.is-pressed {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 rgb(0 0 0 / 0.28);
+}
+
+.tk-key.is-home {
+  outline: 1.5px dashed rgb(255 255 255 / 0.35);
+  outline-offset: -3px;
+}
+
+.tk-key.is-hot {
+  filter: brightness(1.18);
+  transform: translateY(-2px) scale(1.08);
+  box-shadow:
+    0 0 0 2px #fff,
+    0 5px 0 rgb(0 0 0 / 0.28);
+  z-index: 1;
+}
+
+.tk-key.has-bump .tk-bump {
+  position: absolute;
+  left: 50%;
+  bottom: 18%;
+  width: 28%;
+  height: 3px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.85);
+  transform: translateX(-50%);
+}
+
+.tk-label {
+  display: block;
+  text-shadow: 0 1px 1px rgb(0 0 0 / 0.35);
+}
+
+.tk-space {
+  flex: 0 1 auto;
+  width: min(55%, 14rem);
+  max-width: none;
+  aspect-ratio: 6 / 1;
+  min-height: 1.35rem;
+  border-radius: 10px;
+  font-size: clamp(0.65rem, 1.8vw, 0.8rem);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.95;
+}
+
+.tk-guide {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.15rem 0.15rem 0;
+}
+
+.tk-hand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  min-width: 3.2rem;
+}
+
+.tk-fingers {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.18rem;
+  height: 1.55rem;
+}
+
+.tk-finger {
+  width: 0.55rem;
+  border-radius: 999px 999px 4px 4px;
+  opacity: 0.55;
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease,
+    height 160ms ease;
+}
+
+.tk-hand-left .tk-finger:nth-child(1),
+.tk-hand-right .tk-finger:nth-child(4) {
+  height: 0.85rem;
+}
+.tk-hand-left .tk-finger:nth-child(2),
+.tk-hand-right .tk-finger:nth-child(3) {
+  height: 1.15rem;
+}
+.tk-hand-left .tk-finger:nth-child(3),
+.tk-hand-right .tk-finger:nth-child(2) {
+  height: 1.35rem;
+}
+.tk-hand-left .tk-finger:nth-child(4),
+.tk-hand-right .tk-finger:nth-child(1) {
+  height: 1.2rem;
+}
+
+.tk-finger.is-active {
+  opacity: 1;
+  transform: translateY(-3px);
+  box-shadow: 0 0 0 2px #fff;
+}
+
+.tk-thumb {
+  width: 1.1rem;
+  height: 0.45rem;
+  border-radius: 999px;
+  opacity: 0.55;
+  align-self: center;
+  margin-top: -0.05rem;
+}
+
+.tk-hand-left .tk-thumb {
+  align-self: flex-end;
+  margin-right: 0.15rem;
+}
+
+.tk-hand-right .tk-thumb {
+  align-self: flex-start;
+  margin-left: 0.15rem;
+}
+
+.tk-thumb.is-active {
+  opacity: 1;
+  box-shadow: 0 0 0 2px #fff;
+}
+
+.tk-hand-label {
+  font-family: var(--font-display);
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: rgb(255 255 255 / 0.7);
+  letter-spacing: 0.06em;
+}
+
+.tk-coach {
+  margin: 0;
+  text-align: center;
+  font-size: clamp(0.72rem, 2vw, 0.85rem);
+  font-weight: 600;
+  color: #f4fff8;
+  line-height: 1.35;
+}
+
+.tk-coach strong {
+  font-weight: 800;
+}
+
+.tk-coach-key {
+  display: inline-block;
+  min-width: 1.15em;
+  padding: 0.05em 0.35em;
+  margin: 0 0.1em;
+  border-radius: 6px;
+  color: #fff;
+  font-family: var(--font-display);
+  font-weight: 800;
+  text-shadow: 0 1px 1px rgb(0 0 0 / 0.3);
+  box-shadow: 0 2px 0 rgb(0 0 0 / 0.2);
+}
+
+@media (max-width: 520px) {
+  .typing-keyboard {
+    padding: 0.35rem 0.35rem 0.4rem;
+    gap: 0.3rem;
+  }
+
+  .tk-row {
+    gap: 0.18rem;
+  }
+
+  .tk-key {
+    max-width: 2.2rem;
+    border-radius: 6px;
+    border-width: 1.5px;
+  }
+
+  .tk-guide {
+    gap: 0.3rem;
+  }
+
+  .tk-hand {
+    min-width: 2.6rem;
+  }
+
+  .tk-coach {
+    font-size: 0.7rem;
+  }
+}
+
+@media (max-height: 720px) {
+  .typing-keyboard {
+    padding: 0.3rem 0.4rem 0.35rem;
+  }
+
+  .tk-row {
+    gap: 0.2rem;
+  }
+
+  .tk-key {
+    max-width: 2.4rem;
+  }
+
+  .tk-space {
+    min-height: 1.1rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tk-key.is-hot {
+    transform: none;
+  }
+
+  .tk-finger.is-active {
+    transform: none;
+  }
+}

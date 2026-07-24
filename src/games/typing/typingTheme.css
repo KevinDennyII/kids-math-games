@@ -10,8 +10,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.65rem 1rem 0.75rem;
+  gap: 0.4rem;
+  padding: 0.55rem 1rem 0.55rem;
   background:
     radial-gradient(ellipse 70% 40% at 50% 0%, #7ed6c2 0%, transparent 55%),
     linear-gradient(180deg, #2a6f7a 0%, #4a9a8c 40%, #c8e86c 100%);
@@ -240,10 +240,24 @@
 .typing-tip {
   z-index: 2;
   margin: 0;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   color: rgb(255 255 255 / 0.88);
   text-align: center;
   flex-shrink: 0;
+}
+
+@media (max-height: 700px) {
+  .typing-meta {
+    display: none;
+  }
+
+  .typing-tip {
+    display: none;
+  }
+
+  .typing-banner {
+    font-size: 0.85rem;
+  }
 }
 
 @media (max-width: 520px) {

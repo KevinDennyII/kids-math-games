@@ -9,6 +9,7 @@ import { ScorePop } from '../../shared/motion/ScorePop'
 import { applyAnswer } from '../../shared/math/adaptive'
 import type { AdaptiveState } from '../../shared/math/types'
 import { useProgressStore } from '../../shared/store/progressStore'
+import { TypingKeyboard } from './TypingKeyboard'
 import { pickWord, typingConfigForLevel } from './wordBank'
 import './typingTheme.css'
 
@@ -188,22 +189,12 @@ export function TypingGame() {
     return () => cancelAnimationFrame(raf)
   }, [playing, handleMisses, spawnWord])
 
-  useEffect(() => {
-    if (!playing) return
+  const pressChar = useCallback(
+    (raw: string) => {
+      if (recoveringRef.current || !playingRef.current) return
 
-    const onKey = (event: KeyboardEvent) => {
-      if (recoveringRef.current) return
-      if (event.metaKey || event.ctrlKey || event.altKey) return
-
-      if (event.key === 'Escape') {
-        setActiveId(null)
-        setTypedCount(0)
-        return
-      }
-
-      const key = event.key.length === 1 ? event.key.toLowerCase() : ''
+      const key = raw.toLowerCase()
       if (!/^[a-z]$/.test(key)) return
-      event.preventDefault()
 
       const list = wordsRef.current
       let active = activeRef.current
@@ -253,11 +244,32 @@ export function TypingGame() {
         setActiveId(null)
         setTypedCount(0)
       }
+    },
+    [persist, playSfx],
+  )
+
+  useEffect(() => {
+    if (!playing) return
+
+    const onKey = (event: KeyboardEvent) => {
+      if (recoveringRef.current) return
+      if (event.metaKey || event.ctrlKey || event.altKey) return
+
+      if (event.key === 'Escape') {
+        setActiveId(null)
+        setTypedCount(0)
+        return
+      }
+
+      const key = event.key.length === 1 ? event.key.toLowerCase() : ''
+      if (!/^[a-z]$/.test(key)) return
+      event.preventDefault()
+      pressChar(key)
     }
 
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [playing, persist, playSfx])
+  }, [playing, pressChar])
 
   const start = () => {
     setPlaying(true)
@@ -274,6 +286,20 @@ export function TypingGame() {
   }
 
   const config = typingConfigForLevel(saved.level)
+
+  const highlightKeys = (() => {
+    if (!playing || recovering) return [] as string[]
+    if (activeId) {
+      const active = words.find((w) => w.id === activeId)
+      const next = active?.text[typedCount]
+      return next ? [next] : []
+    }
+    const starters = [...words]
+      .sort((a, b) => b.y - a.y)
+      .map((w) => w.text[0])
+      .filter(Boolean) as string[]
+    return [...new Set(starters)]
+  })()
 
   return (
     <main className="typing-shell">
@@ -377,10 +403,21 @@ export function TypingGame() {
         )}
       </section>
 
+      {playing ? (
+        <TypingKeyboard
+          highlightKeys={highlightKeys}
+          showGuide={saved.level <= 3}
+          onKeyPress={pressChar}
+          disabled={recovering}
+        />
+      ) : null}
+
       {banner ? <p className="typing-banner">{banner}</p> : null}
       {playing ? (
         <p className="typing-tip">
-          Tip: type the <em>lowest</em> word first · Esc cancels your current word
+          {saved.level <= 3
+            ? 'Match key colors to your fingers · type the lowest word first'
+            : 'Tip: type the lowest word first · Esc cancels your current word'}
         </p>
       ) : null}
     </main>
