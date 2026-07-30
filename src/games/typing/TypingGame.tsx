@@ -302,13 +302,39 @@ export function TypingGame() {
   })()
 
   return (
-    <main className="typing-shell">
+    <main className={`typing-shell ${playing ? 'is-playing' : ''}`}>
       <div className="typing-sky" aria-hidden="true" />
       <header className="typing-top">
         <Link className="typing-back" to="/">
           ← Home
         </Link>
-        <h1 className="typing-title">Fox Word Rain</h1>
+        <div className="typing-brand">
+          <h1 className="typing-title">Fox Word Rain</h1>
+          <div className="typing-hud" aria-label="Game stats">
+            <div className="typing-stat">
+              <span>Score</span>
+              <strong>{saved.score}</strong>
+            </div>
+            <div className="typing-stat">
+              <span>Streak</span>
+              <strong>{saved.correctStreak}</strong>
+            </div>
+            <div className="typing-stat">
+              <span>Level</span>
+              <strong>{saved.level}</strong>
+            </div>
+            <div
+              className="typing-stat typing-lives"
+              aria-label={`${lives} lives`}
+            >
+              <span>Lives</span>
+              <strong>
+                {'♥'.repeat(lives)}
+                {'♡'.repeat(MAX_LIVES - lives)}
+              </strong>
+            </div>
+          </div>
+        </div>
         <div className="typing-actions">
           <MusicToggle muted={muted} onToggle={() => setMuted(!muted)} />
           <button
@@ -327,47 +353,28 @@ export function TypingGame() {
         </div>
       </header>
 
-      <div className="typing-hud">
-        <div className="typing-stat">
-          <span>Score</span>
-          <strong>{saved.score}</strong>
-        </div>
-        <div className="typing-stat">
-          <span>Streak</span>
-          <strong>{saved.correctStreak}</strong>
-        </div>
-        <div className="typing-stat">
-          <span>Level</span>
-          <strong>{saved.level}</strong>
-        </div>
-        <div className="typing-stat typing-lives" aria-label={`${lives} lives`}>
-          <span>Lives</span>
-          <strong>
-            {'♥'.repeat(lives)}
-            {'♡'.repeat(MAX_LIVES - lives)}
-          </strong>
-        </div>
-      </div>
-
-      <div className="typing-meta">
-        <CharacterSprite
-          src={SPRITES.fox}
-          alt=""
-          size="md"
-          motion={playing ? 'hop' : 'sway'}
-          celebrate={celebrating}
-        />
-        <p>
-          Shared adventure for both kids · rain speeds up as you level
-          {playing
-            ? ` · up to ${config.maxWords} word${config.maxWords > 1 ? 's' : ''}`
-            : ''}
-        </p>
-      </div>
-
       <section className="typing-arena" aria-label="Falling words arena">
         <BurstParticles trigger={burstKey} palette="race" />
         <ScorePop points={popPoints} keyId={popKey} />
+
+        <div className="typing-buddy" aria-hidden={!playing}>
+          <CharacterSprite
+            src={SPRITES.fox}
+            alt=""
+            size="sm"
+            motion={playing ? 'hop' : 'sway'}
+            celebrate={celebrating}
+          />
+          {!playing ? (
+            <p className="typing-buddy-note">
+              Shared adventure · rain speeds up as you level
+            </p>
+          ) : (
+            <p className="typing-buddy-note">
+              Up to {config.maxWords} word{config.maxWords > 1 ? 's' : ''}
+            </p>
+          )}
+        </div>
 
         {!playing ? (
           <div className="typing-start">
@@ -401,24 +408,24 @@ export function TypingGame() {
             <div className="typing-ground" aria-hidden="true" />
           </>
         )}
+
+        {banner ? <p className="typing-banner">{banner}</p> : null}
       </section>
 
       {playing ? (
-        <TypingKeyboard
-          highlightKeys={highlightKeys}
-          showGuide={saved.level <= 3}
-          onKeyPress={pressChar}
-          disabled={recovering}
-        />
-      ) : null}
-
-      {banner ? <p className="typing-banner">{banner}</p> : null}
-      {playing ? (
-        <p className="typing-tip">
-          {saved.level <= 3
-            ? 'Match key colors to your fingers · type the lowest word first'
-            : 'Tip: type the lowest word first · Esc cancels your current word'}
-        </p>
+        <div className="typing-controls">
+          <TypingKeyboard
+            highlightKeys={highlightKeys}
+            showGuide={saved.level <= 3}
+            onKeyPress={pressChar}
+            disabled={recovering}
+          />
+          <p className="typing-tip">
+            {saved.level <= 3
+              ? 'Match key colors to your fingers · type the lowest word first'
+              : 'Tip: type the lowest word first · Esc cancels your current word'}
+          </p>
+        </div>
       ) : null}
     </main>
   )

@@ -35,7 +35,8 @@ export type TypingLevelConfig = {
 /** Fall speed = % of arena height per second */
 export function typingConfigForLevel(level: number): TypingLevelConfig {
   const clamped = Math.min(3, Math.max(1, level))
-  if (clamped === 1) return { fallSpeed: 7.5, maxWords: 1, spawnMs: 2600 }
-  if (clamped === 2) return { fallSpeed: 11, maxWords: 2, spawnMs: 2000 }
-  return { fallSpeed: 15.5, maxWords: 3, spawnMs: 1500 }
+  // Tuned for a tall playfield: kids get a longer runway before words hit ground.
+  if (clamped === 1) return { fallSpeed: 6.5, maxWords: 1, spawnMs: 2800 }
+  if (clamped === 2) return { fallSpeed: 9, maxWords: 2, spawnMs: 2200 }
+  return { fallSpeed: 12, maxWords: 3, spawnMs: 1700 }
 }
