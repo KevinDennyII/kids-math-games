@@ -177,9 +177,10 @@
 
 .typing-cta {
   background:
-    linear-gradient(160deg, #5eead4 0%, #2a9d8f 100%);
-  color: #083344;
+    linear-gradient(160deg, #1e3a5f 0%, #0f2744 55%, #16324f 100%);
+  color: #e8f4ff;
   min-height: 140px;
+  border: 1px solid rgb(140 210 255 / 0.28);
 }
 
 .cta-kicker {

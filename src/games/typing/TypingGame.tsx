@@ -2,15 +2,26 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { MusicToggle } from '../../shared/audio/MusicToggle'
 import { useGameMusic } from '../../shared/audio/useGameMusic'
-import { CharacterSprite } from '../../shared/characters/CharacterSprite'
-import { SPRITES } from '../../shared/characters/sprites'
 import { BurstParticles } from '../../shared/motion/BurstParticles'
 import { ScorePop } from '../../shared/motion/ScorePop'
-import { applyAnswer } from '../../shared/math/adaptive'
+import {
+  applyAnswer,
+  progressTowardNextLevel,
+  type AdaptiveOptions,
+} from '../../shared/math/adaptive'
 import type { AdaptiveState } from '../../shared/math/types'
 import { useProgressStore } from '../../shared/store/progressStore'
+import { AstroFox } from './AstroFox'
+import { RocketWord } from './RocketWord'
 import { TypingKeyboard } from './TypingKeyboard'
-import { pickWord, typingConfigForLevel } from './wordBank'
+import {
+  TYPING_CORRECT_PER_LEVEL,
+  TYPING_LEVEL_UP_BONUS,
+  TYPING_MAX_LEVEL,
+  TYPING_WRONG_TO_DROP,
+  pickWord,
+  typingConfigForLevel,
+} from './wordBank'
 import './typingTheme.css'
 
 type FallingWord = {
@@ -20,10 +31,36 @@ type FallingWord = {
   y: number
 }
 
+type LevelReward = {
+  level: number
+  bonus: number
+  label: string
+}
+
 const MAX_LIVES = 3
+
+const TYPING_ADAPTIVE: AdaptiveOptions = {
+  correctPerLevel: TYPING_CORRECT_PER_LEVEL,
+  maxLevel: TYPING_MAX_LEVEL,
+  wrongToDrop: TYPING_WRONG_TO_DROP,
+  resetStreakOnWrong: false,
+  levelUpBonus: TYPING_LEVEL_UP_BONUS,
+}
+
+const ORBIT_REWARDS = [
+  'Moon Badge',
+  'Comet Badge',
+  'Nebula Badge',
+  'Galaxy Badge',
+  'Star Captain',
+] as const
 
 function uid() {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
+}
+
+function rewardName(level: number) {
+  return ORBIT_REWARDS[Math.min(ORBIT_REWARDS.length, Math.max(1, level)) - 1]!
 }
 
 export function TypingGame() {
@@ -43,13 +80,14 @@ export function TypingGame() {
   const [popKey, setPopKey] = useState(0)
   const [recovering, setRecovering] = useState(false)
   const [celebrating, setCelebrating] = useState(false)
+  const [levelReward, setLevelReward] = useState<LevelReward | null>(null)
 
   const stateRef = useRef(saved)
   const wordsRef = useRef(words)
   const activeRef = useRef(activeId)
   const typedRef = useRef(typedCount)
   const playingRef = useRef(playing)
-  const recoveringRef = useRef(recovering)
+  const pausedRef = useRef(false)
   const lastTs = useRef<number | null>(null)
   const spawnAcc = useRef(0)
 
@@ -69,8 +107,8 @@ export function TypingGame() {
     playingRef.current = playing
   }, [playing])
   useEffect(() => {
-    recoveringRef.current = recovering
-  }, [recovering])
+    pausedRef.current = recovering || levelReward != null
+  }, [recovering, levelReward])
 
   const persist = useCallback(
     (next: AdaptiveState) => {
@@ -101,7 +139,7 @@ export function TypingGame() {
         setTypedCount(0)
       }
 
-      const result = applyAnswer(stateRef.current, false)
+      const result = applyAnswer(stateRef.current, false, TYPING_ADAPTIVE)
       persist(result.state)
       playSfx('wrong')
 
@@ -111,8 +149,8 @@ export function TypingGame() {
           setRecovering(true)
           setBanner(
             result.leveledDown
-              ? 'Fox scooped the words! Slower rain — you’ve got this.'
-              : 'Fox scooped the words! Hearts refilled — keep typing!',
+              ? 'Fox rescued the rockets! Slower flights — you’ve got this.'
+              : 'Fox rescued the rockets! Hearts refilled — keep typing!',
           )
           window.setTimeout(() => {
             setLives(MAX_LIVES)
@@ -120,13 +158,13 @@ export function TypingGame() {
             setActiveId(null)
             setTypedCount(0)
             setRecovering(false)
-            setBanner('Ready? Words are falling again!')
+            setBanner('Ready? Rockets launching again!')
             spawnAcc.current = 0
             lastTs.current = null
           }, 1600)
           return 0
         }
-        setBanner('A word got away — type the lowest one first!')
+        setBanner('A rocket got away — type the lowest one first!')
         return left
       })
     },
@@ -140,7 +178,7 @@ export function TypingGame() {
     const tick = (ts: number) => {
       if (!playingRef.current) return
 
-      if (recoveringRef.current) {
+      if (pausedRef.current) {
         lastTs.current = ts
         raf = requestAnimationFrame(tick)
         return
@@ -174,7 +212,7 @@ export function TypingGame() {
       }
 
       if (
-        !recoveringRef.current &&
+        !pausedRef.current &&
         spawnAcc.current >= config.spawnMs &&
         wordsRef.current.length < config.maxWords
       ) {
@@ -191,7 +229,7 @@ export function TypingGame() {
 
   const pressChar = useCallback(
     (raw: string) => {
-      if (recoveringRef.current || !playingRef.current) return
+      if (pausedRef.current || !playingRef.current) return
 
       const key = raw.toLowerCase()
       if (!/^[a-z]$/.test(key)) return
@@ -228,31 +266,47 @@ export function TypingGame() {
         setCelebrating(true)
         window.setTimeout(() => setCelebrating(false), 500)
 
-        const result = applyAnswer(stateRef.current, true)
+        const result = applyAnswer(stateRef.current, true, TYPING_ADAPTIVE)
         persist(result.state)
         setPopPoints(result.pointsEarned)
         setPopKey((k) => k + 1)
-        setBanner(
-          result.leveledUp
-            ? 'Level up! Words will fall a little faster.'
-            : `Nice! “${target.text}” cleared!`,
-        )
 
         const remaining = list.filter((w) => w.id !== target!.id)
         wordsRef.current = remaining
         setWords(remaining)
         setActiveId(null)
         setTypedCount(0)
+
+        if (result.leveledUp) {
+          const cfg = typingConfigForLevel(result.state.level)
+          setLevelReward({
+            level: result.state.level,
+            bonus: TYPING_LEVEL_UP_BONUS,
+            label: rewardName(result.state.level),
+          })
+          setBanner(`Orbit ${result.state.level} unlocked!`)
+          window.setTimeout(() => {
+            setLevelReward(null)
+            setWords([])
+            wordsRef.current = []
+            spawnAcc.current = 0
+            lastTs.current = null
+            setBanner(`${cfg.label} — keep typing!`)
+            window.setTimeout(() => spawnWord(), 350)
+          }, 2800)
+        } else {
+          setBanner(`Blast off! “${target.text}” cleared!`)
+        }
       }
     },
-    [persist, playSfx],
+    [persist, playSfx, spawnWord],
   )
 
   useEffect(() => {
     if (!playing) return
 
     const onKey = (event: KeyboardEvent) => {
-      if (recoveringRef.current) return
+      if (pausedRef.current) return
       if (event.metaKey || event.ctrlKey || event.altKey) return
 
       if (event.key === 'Escape') {
@@ -279,16 +333,25 @@ export function TypingGame() {
     setTypedCount(0)
     setLives(MAX_LIVES)
     setRecovering(false)
-    setBanner('Type the falling words before they reach the ground!')
+    setLevelReward(null)
+    setBanner('Type the rocket words before they land on the planet!')
     spawnAcc.current = 0
     lastTs.current = null
     window.setTimeout(() => spawnWord(), 400)
   }
 
   const config = typingConfigForLevel(saved.level)
+  const atMaxOrbit = saved.level >= TYPING_MAX_LEVEL
+  const orbitProgress = progressTowardNextLevel(
+    saved.correctStreak,
+    TYPING_CORRECT_PER_LEVEL,
+  )
+  const progressForBar = atMaxOrbit
+    ? TYPING_CORRECT_PER_LEVEL
+    : orbitProgress
 
   const highlightKeys = (() => {
-    if (!playing || recovering) return [] as string[]
+    if (!playing || recovering || levelReward) return [] as string[]
     if (activeId) {
       const active = words.find((w) => w.id === activeId)
       const next = active?.text[typedCount]
@@ -309,19 +372,21 @@ export function TypingGame() {
           ← Home
         </Link>
         <div className="typing-brand">
-          <h1 className="typing-title">Fox Word Rain</h1>
+          <h1 className="typing-title">Fox Rockets</h1>
           <div className="typing-hud" aria-label="Game stats">
             <div className="typing-stat">
               <span>Score</span>
               <strong>{saved.score}</strong>
             </div>
-            <div className="typing-stat">
-              <span>Streak</span>
-              <strong>{saved.correctStreak}</strong>
-            </div>
-            <div className="typing-stat">
-              <span>Level</span>
-              <strong>{saved.level}</strong>
+            <div className="typing-stat typing-orbit-stat">
+              <span>Orbit</span>
+              <strong>
+                {saved.level}
+                <span className="typing-orbit-stars" aria-hidden="true">
+                  {'★'.repeat(saved.level)}
+                  {'☆'.repeat(TYPING_MAX_LEVEL - saved.level)}
+                </span>
+              </strong>
             </div>
             <div
               className="typing-stat typing-lives"
@@ -334,6 +399,34 @@ export function TypingGame() {
               </strong>
             </div>
           </div>
+          {playing ? (
+            <div
+              className="typing-orbit-progress"
+              aria-label={
+                atMaxOrbit
+                  ? 'Max orbit reached'
+                  : `${progressForBar} of ${TYPING_CORRECT_PER_LEVEL} rockets to next orbit`
+              }
+            >
+              <div className="typing-orbit-progress-label">
+                {atMaxOrbit ? (
+                  <span>Max orbit · Star Captain!</span>
+                ) : (
+                  <span>
+                    Next orbit · {progressForBar}/{TYPING_CORRECT_PER_LEVEL}
+                  </span>
+                )}
+              </div>
+              <div className="typing-orbit-track">
+                <div
+                  className="typing-orbit-fill"
+                  style={{
+                    width: `${(progressForBar / TYPING_CORRECT_PER_LEVEL) * 100}%`,
+                  }}
+                />
+              </div>
+            </div>
+          ) : null}
         </div>
         <div className="typing-actions">
           <MusicToggle muted={muted} onToggle={() => setMuted(!muted)} />
@@ -346,6 +439,7 @@ export function TypingGame() {
               setWords([])
               wordsRef.current = []
               setBanner(null)
+              setLevelReward(null)
             }}
           >
             Reset
@@ -353,39 +447,37 @@ export function TypingGame() {
         </div>
       </header>
 
-      <section className="typing-arena" aria-label="Falling words arena">
+      <section className="typing-arena" aria-label="Rocket words arena">
         <BurstParticles trigger={burstKey} palette="race" />
         <ScorePop points={popPoints} keyId={popKey} />
 
         <div className="typing-buddy" aria-hidden={!playing}>
-          <CharacterSprite
-            src={SPRITES.fox}
-            alt=""
+          <AstroFox
             size="sm"
             motion={playing ? 'hop' : 'sway'}
-            celebrate={celebrating}
+            celebrate={celebrating || levelReward != null}
           />
           {!playing ? (
             <p className="typing-buddy-note">
-              Shared adventure · rain speeds up as you level
+              Clear {TYPING_CORRECT_PER_LEVEL} rockets to unlock each orbit
             </p>
           ) : (
             <p className="typing-buddy-note">
-              Up to {config.maxWords} word{config.maxWords > 1 ? 's' : ''}
+              Up to {config.maxWords} rocket{config.maxWords > 1 ? 's' : ''}
             </p>
           )}
         </div>
 
         {!playing ? (
           <div className="typing-start">
-            <h2>Catch the words!</h2>
+            <h2>Launch the rockets!</h2>
             <p>
-              Words fall from the sky. Type them before they hit the ground. The
-              rain adapts — great for both kids, with room for your son to push
-              ahead.
+              Word rockets drift down from the stars. Type them before they land
+              on the planet. Earn a space badge every orbit — take your time,
+              levels stay gentle for growing typists.
             </p>
             <button type="button" className="typing-start-btn" onClick={start}>
-              Start Word Rain
+              Start Fox Rockets
             </button>
           </div>
         ) : (
@@ -395,21 +487,36 @@ export function TypingGame() {
               const matched = isActive ? w.text.slice(0, typedCount) : ''
               const rest = isActive ? w.text.slice(typedCount) : w.text
               return (
-                <div
+                <RocketWord
                   key={w.id}
-                  className={`falling-word ${isActive ? 'is-active' : ''}`}
-                  style={{ left: `${w.x}%`, top: `${w.y}%` }}
-                >
-                  <span className="fw-matched">{matched}</span>
-                  <span className="fw-rest">{rest}</span>
-                </div>
+                  id={w.id}
+                  x={w.x}
+                  y={w.y}
+                  matched={matched}
+                  rest={rest}
+                  active={isActive}
+                />
               )
             })}
             <div className="typing-ground" aria-hidden="true" />
           </>
         )}
 
-        {banner ? <p className="typing-banner">{banner}</p> : null}
+        {levelReward ? (
+          <div className="typing-reward" role="status" aria-live="polite">
+            <div className="typing-reward-badge" aria-hidden="true">
+              <span className="typing-reward-star">★</span>
+            </div>
+            <h2>Orbit {levelReward.level} unlocked!</h2>
+            <p className="typing-reward-name">{levelReward.label}</p>
+            <p className="typing-reward-bonus">+{levelReward.bonus} points</p>
+            <AstroFox size="md" motion="hop" celebrate />
+          </div>
+        ) : null}
+
+        {banner && !levelReward ? (
+          <p className="typing-banner">{banner}</p>
+        ) : null}
       </section>
 
       {playing ? (
@@ -418,12 +525,12 @@ export function TypingGame() {
             highlightKeys={highlightKeys}
             showGuide={saved.level <= 3}
             onKeyPress={pressChar}
-            disabled={recovering}
+            disabled={recovering || levelReward != null}
           />
           <p className="typing-tip">
             {saved.level <= 3
-              ? 'Match key colors to your fingers · type the lowest word first'
-              : 'Tip: type the lowest word first · Esc cancels your current word'}
+              ? 'Match key colors to your fingers · type the lowest rocket first'
+              : 'Tip: type the lowest rocket first · Esc cancels your current word'}
           </p>
         </div>
       ) : null}

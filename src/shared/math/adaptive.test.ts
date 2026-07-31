@@ -21,6 +21,31 @@ describe('adaptive difficulty', () => {
     expect(second.state.level).toBe(1)
     expect(second.leveledDown).toBe(true)
   })
+
+  it('supports longer typing orbits without wiping progress on a miss', () => {
+    let state = createAdaptiveState()
+    const typing = {
+      correctPerLevel: 8,
+      maxLevel: 5,
+      wrongToDrop: 3,
+      resetStreakOnWrong: false,
+      levelUpBonus: 50,
+    }
+
+    for (let i = 0; i < 7; i++) {
+      state = applyAnswer(state, true, typing).state
+    }
+    expect(state.level).toBe(1)
+    expect(state.correctStreak).toBe(7)
+
+    state = applyAnswer(state, false, typing).state
+    expect(state.correctStreak).toBe(7)
+
+    const leveled = applyAnswer(state, true, typing)
+    expect(leveled.leveledUp).toBe(true)
+    expect(leveled.state.level).toBe(2)
+    expect(leveled.pointsEarned).toBeGreaterThanOrEqual(50)
+  })
 })
 
 describe('problem generators', () => {

@@ -90,7 +90,8 @@ export function Home() {
         <p className="home-brand">Kids Math Games</p>
         <h1 className="home-headline">Pick your adventure</h1>
         <p className="home-sub">
-          Math worlds for each kid — plus a shared typing rain they can both play.
+          Math worlds for each kid — plus a shared space typing game they can
+          both play.
         </p>
 
         <div className="home-fox-banner" aria-hidden="true">
@@ -122,8 +123,8 @@ export function Home() {
               <ColorfulKeyboard />
             </div>
             <span className="cta-kicker">Both kids · Typing</span>
-            <span className="cta-title">Fox Word Rain</span>
-            <span className="cta-copy">Type falling words before they land</span>
+            <span className="cta-title">Fox Rockets</span>
+            <span className="cta-copy">Type word rockets before they land</span>
           </Link>
         </div>
       </div>
