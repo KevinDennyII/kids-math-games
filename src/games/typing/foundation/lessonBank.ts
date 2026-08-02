@@ -14,7 +14,7 @@ export type FoundationLesson = {
   prompts: string[]
 }
 
-const HOME_ROW = ['a', 's', 'd', 'f', 'j', 'k', 'l']
+const HOME_ROW = ['a', 's', 'd', 'f', 'j', 'k', 'l', ';']
 
 const LEFT_HAND = [
   'q',
@@ -43,9 +43,16 @@ const RIGHT_HAND = [
   'm',
   'i',
   'k',
+  ',',
   'o',
   'l',
+  '.',
   'p',
+  ';',
+  "'",
+  '/',
+  '[',
+  ']',
 ]
 
 /** Short words built from home / near-home keys. */
@@ -78,7 +85,7 @@ export const FOUNDATION_LESSONS: FoundationLesson[] = [
     title: 'Home Base',
     subtitle: 'Find the bumps',
     intro:
-      'Rest your fingers on A S D F and J K L. Feel the bumps on F and J — those are home base!',
+      'Rest your fingers on A S D F and J K L ; — left pinky on A (near caps/shift), right pinky on ;. Feel the bumps on F and J!',
     kind: 'key',
     targetHits: 8,
     prompts: ['f', 'j', 'f', 'j', 'f', 'j', 'd', 'k'],
@@ -86,7 +93,7 @@ export const FOUNDATION_LESSONS: FoundationLesson[] = [
   {
     id: 'home-row',
     title: 'Home Row',
-    subtitle: 'ASDF · JKL',
+    subtitle: 'ASDF · JKL;',
     intro: 'Keep fingers on the home row. Type the glowing letter with the matching finger.',
     kind: 'key',
     targetHits: 10,

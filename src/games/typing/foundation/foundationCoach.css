@@ -142,17 +142,38 @@
 }
 
 .foundation-coach-board .tk-row {
-  gap: 0.35rem;
-  padding-left: calc(var(--tk-offset, 0) * 1.35);
+  gap: 0.28rem;
 }
 
 .foundation-coach-board .tk-key {
-  width: 4.1rem;
-  max-width: 4.1rem;
-  border-radius: 11px;
+  width: 2.85rem;
+  max-width: 2.85rem;
+  border-radius: 10px;
   border-width: 2.5px;
-  font-size: clamp(0.95rem, 2.5vw, 1.25rem);
+  font-size: clamp(0.85rem, 2.2vw, 1.1rem);
   box-shadow: 0 4px 0 rgb(0 0 0 / 0.3);
+}
+
+.foundation-coach-board .tk-key.is-wide-sm,
+.foundation-coach-board .tk-key.is-wide-md,
+.foundation-coach-board .tk-key.is-wide-lg {
+  min-height: 2.85rem;
+  font-size: clamp(0.55rem, 1.5vw, 0.72rem);
+}
+
+.foundation-coach-board .tk-key.is-wide-sm {
+  width: 3.6rem;
+  max-width: 3.6rem;
+}
+
+.foundation-coach-board .tk-key.is-wide-md {
+  width: 4.2rem;
+  max-width: 4.2rem;
+}
+
+.foundation-coach-board .tk-key.is-wide-lg {
+  width: 5.4rem;
+  max-width: 5.4rem;
 }
 
 .foundation-coach-board .tk-key.tk-space {
@@ -194,6 +215,15 @@
 
 .foundation-coach.is-placement .foundation-coach-board .tk-key.is-home-rest {
   opacity: 1;
+}
+
+/* Keep pinky guide keys readable during home placement */
+.foundation-coach.is-placement .foundation-coach-board .tk-key[data-key='tab'],
+.foundation-coach.is-placement .foundation-coach-board .tk-key[data-key='caps'],
+.foundation-coach.is-placement .foundation-coach-board .tk-key[data-key='shift-l'],
+.foundation-coach.is-placement .foundation-coach-board .tk-key[data-key='shift-r'] {
+  opacity: 0.92;
+  filter: none;
 }
 
 /* —— Large color-scheme hand guide below keyboard (outside shaded chrome) —— */
@@ -326,9 +356,27 @@
 
 @media (max-width: 720px) {
   .foundation-coach-board .tk-key {
-    width: 3.15rem;
-    max-width: 3.15rem;
-    font-size: clamp(0.8rem, 2.2vw, 1rem);
+    width: 2.2rem;
+    max-width: 2.2rem;
+    font-size: clamp(0.7rem, 2vw, 0.9rem);
+  }
+
+  .foundation-coach-board .tk-key.is-wide-sm {
+    width: 2.8rem;
+    max-width: 2.8rem;
+    min-height: 2.2rem;
+  }
+
+  .foundation-coach-board .tk-key.is-wide-md {
+    width: 3.2rem;
+    max-width: 3.2rem;
+    min-height: 2.2rem;
+  }
+
+  .foundation-coach-board .tk-key.is-wide-lg {
+    width: 4rem;
+    max-width: 4rem;
+    min-height: 2.2rem;
   }
 
   .foundation-coach-board .tk-key.tk-space {
@@ -383,10 +431,32 @@
 
 @media (max-width: 520px) {
   .foundation-coach-board .tk-key {
+    width: 1.75rem;
+    max-width: 1.75rem;
+    border-radius: 7px;
+    font-size: 0.68rem;
+  }
+
+  .foundation-coach-board .tk-key.is-wide-sm,
+  .foundation-coach-board .tk-key.is-wide-md,
+  .foundation-coach-board .tk-key.is-wide-lg {
+    min-height: 1.75rem;
+    font-size: 0.48rem;
+  }
+
+  .foundation-coach-board .tk-key.is-wide-sm {
+    width: 2.2rem;
+    max-width: 2.2rem;
+  }
+
+  .foundation-coach-board .tk-key.is-wide-md {
     width: 2.55rem;
     max-width: 2.55rem;
-    border-radius: 8px;
-    font-size: 0.78rem;
+  }
+
+  .foundation-coach-board .tk-key.is-wide-lg {
+    width: 3.1rem;
+    max-width: 3.1rem;
   }
 
   .foundation-coach-board .tk-key.tk-space {

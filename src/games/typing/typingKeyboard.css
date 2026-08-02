@@ -29,7 +29,6 @@
   gap: 0.18rem;
   width: max-content;
   max-width: 100%;
-  padding-left: var(--tk-offset, 0);
   box-sizing: border-box;
 }
 
@@ -47,8 +46,8 @@
   --tk-color: #64748b;
   position: relative;
   flex: 1 1 0;
-  width: 2.35rem;
-  max-width: 2.35rem;
+  width: 2.1rem;
+  max-width: 2.1rem;
   min-width: 0;
   aspect-ratio: 1 / 1;
   min-height: 0;
@@ -57,7 +56,7 @@
   background: var(--tk-color);
   color: #fff;
   font-family: var(--font-display);
-  font-size: clamp(0.65rem, 1.9vw, 0.82rem);
+  font-size: clamp(0.6rem, 1.7vw, 0.78rem);
   font-weight: 700;
   line-height: 1;
   cursor: default;
@@ -70,6 +69,36 @@
   touch-action: manipulation;
   user-select: none;
   padding: 0;
+}
+
+.tk-key.is-wide-sm,
+.tk-key.is-wide-md,
+.tk-key.is-wide-lg {
+  aspect-ratio: auto;
+  min-height: 2.1rem;
+  padding: 0 0.25rem;
+  font-size: clamp(0.48rem, 1.3vw, 0.62rem);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.tk-key.is-wide-sm {
+  width: 2.85rem;
+  max-width: 2.85rem;
+}
+
+.tk-key.is-wide-md {
+  width: 3.35rem;
+  max-width: 3.35rem;
+}
+
+.tk-key.is-wide-lg {
+  width: 4.25rem;
+  max-width: 4.25rem;
+}
+
+.tk-key.is-decorative {
+  opacity: 0.9;
 }
 
 /* After .tk-key so letter sizing doesn't clip the bar to one key */
@@ -383,10 +412,28 @@
   }
 
   .tk-key {
-    width: 1.95rem;
-    max-width: 1.95rem;
+    width: 1.7rem;
+    max-width: 1.7rem;
     border-radius: 5px;
     border-width: 1.5px;
+  }
+
+  .tk-key.is-wide-sm {
+    width: 2.3rem;
+    max-width: 2.3rem;
+    min-height: 1.7rem;
+  }
+
+  .tk-key.is-wide-md {
+    width: 2.7rem;
+    max-width: 2.7rem;
+    min-height: 1.7rem;
+  }
+
+  .tk-key.is-wide-lg {
+    width: 3.4rem;
+    max-width: 3.4rem;
+    min-height: 1.7rem;
   }
 
   .tk-guide {
@@ -418,8 +465,8 @@
   }
 
   .tk-key {
-    width: 2rem;
-    max-width: 2rem;
+    width: 1.85rem;
+    max-width: 1.85rem;
     border-width: 1.5px;
   }
 
@@ -479,8 +526,8 @@
   }
 
   .tk-key {
-    width: 1.7rem;
-    max-width: 1.7rem;
+    width: 1.55rem;
+    max-width: 1.55rem;
   }
 
   .tk-coach {

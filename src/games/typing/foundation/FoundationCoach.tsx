@@ -1,6 +1,7 @@
 import {
   FINGER_COLORS,
   FINGER_LABELS,
+  displayKeyLabel,
   fingerForLetter,
 } from '../fingerMap'
 import { FingerPlacementGuide, TypingKeyboard } from '../TypingKeyboard'
@@ -47,7 +48,7 @@ export function FoundationCoach({
                     : undefined
                 }
               >
-                {prompt.toUpperCase()}
+                {displayKeyLabel(prompt)}
               </span>
             ) : (
               <span className="drill-cue-word">

@@ -4,8 +4,10 @@ import {
   HOME_KEYS,
   KEYBOARD_ROWS,
   colorForLetter,
+  displayKeyLabel,
   fingerForLetter,
   type FingerId,
+  type KeyDef,
 } from './fingerMap'
 import './typingKeyboard.css'
 
@@ -15,7 +17,7 @@ type Props = {
   /** Levels 1–3: show hand-placement coach under the keys. */
   showGuide?: boolean
   /**
-   * Emphasize home-row resting keys (A S D F · J K L) and F/J bumps
+   * Emphasize home-row resting keys (A S D F · J K L ;) and F/J bumps
    * so beginners know where to park their hands first.
    */
   showHomePlacement?: boolean
@@ -99,7 +101,7 @@ export function FingerPlacementGuide({
                   className="tk-coach-key"
                   style={{ background: colorForLetter(primary) }}
                 >
-                  {primary.toUpperCase()}
+                  {displayKeyLabel(primary)}
                 </span>
               </>
             ) : null}
@@ -122,6 +124,73 @@ export function FingerPlacementGuide({
   )
 }
 
+function BoardKey({
+  keyDef,
+  highlight,
+  labelHome,
+  showFingerLabels,
+  onKeyPress,
+  disabled,
+}: {
+  keyDef: KeyDef
+  highlight: Set<string>
+  labelHome: boolean
+  showFingerLabels: boolean
+  onKeyPress?: (letter: string) => void
+  disabled: boolean
+}) {
+  const { id, label, wide, decorative } = keyDef
+  const isHome = HOME_KEYS.has(id)
+  const isHot = highlight.has(id)
+  const isBump = id === 'f' || id === 'j'
+  const color = colorForLetter(id)
+  const finger = fingerForLetter(id)
+  const fingerName = finger ? FINGER_LABELS[finger] : label
+  const canType = Boolean(onKeyPress) && !decorative && !disabled
+
+  return (
+    <button
+      type="button"
+      className={[
+        'tk-key',
+        wide ? `is-wide-${wide}` : '',
+        decorative ? 'is-decorative' : '',
+        isHome ? 'is-home' : '',
+        labelHome && isHome ? 'is-home-rest' : '',
+        isHot ? 'is-hot' : '',
+        isBump ? 'has-bump' : '',
+        labelHome && isBump ? 'is-bump-guide' : '',
+        isHot && finger ? 'is-finger-target' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+      data-key={id}
+      style={{ ['--tk-color' as string]: color }}
+      aria-label={`${label}, ${fingerName}${
+        labelHome && isHome ? ', home row resting key' : ''
+      }${decorative ? ', guide only' : ''}`}
+      disabled={!canType}
+      tabIndex={canType ? 0 : -1}
+      onPointerDown={(e) => {
+        if (!canType || !onKeyPress) return
+        e.preventDefault()
+        onKeyPress(id)
+      }}
+    >
+      <span className="tk-label">{label}</span>
+      {isBump && <span className="tk-bump" aria-hidden="true" />}
+      {showFingerLabels && isHome && finger ? (
+        <span className="tk-finger-label">{FINGER_SHORT[finger]}</span>
+      ) : null}
+      {labelHome && isBump ? (
+        <span className="tk-bump-tag" aria-hidden="true">
+          bump
+        </span>
+      ) : null}
+    </button>
+  )
+}
+
 export function TypingKeyboard({
   highlightKeys = [],
   showGuide = false,
@@ -141,60 +210,18 @@ export function TypingKeyboard({
     >
       <div className="tk-board">
         {KEYBOARD_ROWS.map((row, rowIndex) => (
-          <div
-            key={rowIndex}
-            className={`tk-row tk-row-${rowIndex}`}
-            style={{ ['--tk-offset' as string]: `${rowIndex * 1.1}rem` }}
-          >
-            {row.map((letter) => {
-              const isHome = HOME_KEYS.has(letter)
-              const isHot = highlight.has(letter)
-              const isBump = letter === 'f' || letter === 'j'
-              const color = colorForLetter(letter)
-              const finger = fingerForLetter(letter)
-              const label = finger ? FINGER_LABELS[finger] : letter
-
-              return (
-                <button
-                  key={letter}
-                  type="button"
-                  className={[
-                    'tk-key',
-                    isHome ? 'is-home' : '',
-                    labelHome && isHome ? 'is-home-rest' : '',
-                    isHot ? 'is-hot' : '',
-                    isBump ? 'has-bump' : '',
-                    labelHome && isBump ? 'is-bump-guide' : '',
-                    isHot && finger ? 'is-finger-target' : '',
-                  ]
-                    .filter(Boolean)
-                    .join(' ')}
-                  data-key={letter}
-                  style={{ ['--tk-color' as string]: color }}
-                  aria-label={`${letter.toUpperCase()}, ${label}${
-                    labelHome && isHome ? ', home row resting key' : ''
-                  }`}
-                  disabled={disabled || !onKeyPress}
-                  tabIndex={onKeyPress ? 0 : -1}
-                  onPointerDown={(e) => {
-                    if (!onKeyPress || disabled) return
-                    e.preventDefault()
-                    onKeyPress(letter)
-                  }}
-                >
-                  <span className="tk-label">{letter.toUpperCase()}</span>
-                  {isBump && <span className="tk-bump" aria-hidden="true" />}
-                  {showFingerLabels && isHome && finger ? (
-                    <span className="tk-finger-label">{FINGER_SHORT[finger]}</span>
-                  ) : null}
-                  {labelHome && isBump ? (
-                    <span className="tk-bump-tag" aria-hidden="true">
-                      bump
-                    </span>
-                  ) : null}
-                </button>
-              )
-            })}
+          <div key={rowIndex} className={`tk-row tk-row-${rowIndex}`}>
+            {row.map((keyDef) => (
+              <BoardKey
+                key={keyDef.id}
+                keyDef={keyDef}
+                highlight={highlight}
+                labelHome={labelHome}
+                showFingerLabels={showFingerLabels}
+                onKeyPress={onKeyPress}
+                disabled={disabled}
+              />
+            ))}
           </div>
         ))}
 
