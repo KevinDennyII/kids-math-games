@@ -592,6 +592,40 @@
   transform: translateY(3px);
 }
 
+.typing-start-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  justify-content: center;
+  margin-top: 0.35rem;
+}
+
+.typing-start-btn-secondary {
+  margin-top: 0.5rem;
+  border: 1px solid rgb(140 210 255 / 0.4);
+  border-radius: 999px;
+  padding: 0.85rem 1.4rem;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  background: rgb(16 28 52 / 0.85);
+  color: #e8f0ff;
+  cursor: pointer;
+  box-shadow: 0 5px 0 rgb(0 0 0 / 0.22);
+  transition: transform var(--spring-snappy-time) var(--spring-snappy);
+}
+
+.typing-start-btn-secondary:active {
+  transform: translateY(3px);
+}
+
+.typing-start-nudge {
+  margin: 0.25rem 0 0;
+  font-size: 0.9rem;
+  color: #fdba74;
+  font-weight: 700;
+}
+
 .typing-banner {
   position: absolute;
   left: 50%;

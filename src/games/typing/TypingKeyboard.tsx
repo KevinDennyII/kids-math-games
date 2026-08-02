@@ -14,6 +14,13 @@ type Props = {
   highlightKeys?: string[]
   /** Levels 1–3: show hand-placement coach under the keys. */
   showGuide?: boolean
+  /**
+   * Emphasize home-row resting keys (A S D F · J K L) and F/J bumps
+   * so beginners know where to park their hands first.
+   */
+  showHomePlacement?: boolean
+  /** Print short finger names on home keys (foundation coaching). */
+  showFingerLabels?: boolean
   /** Optional tap handler for tablet / mouse play. */
   onKeyPress?: (letter: string) => void
   disabled?: boolean
@@ -21,6 +28,18 @@ type Props = {
 
 const LEFT_FINGERS: FingerId[] = ['lp', 'lr', 'lm', 'li']
 const RIGHT_FINGERS: FingerId[] = ['ri', 'rm', 'rr', 'rp']
+
+const FINGER_SHORT: Record<FingerId, string> = {
+  lp: 'pinky',
+  lr: 'ring',
+  lm: 'middle',
+  li: 'index',
+  ri: 'index',
+  rm: 'middle',
+  rr: 'ring',
+  rp: 'pinky',
+  th: 'thumbs',
+}
 
 function HandGuide({
   side,
@@ -53,19 +72,73 @@ function HandGuide({
   )
 }
 
-export function TypingKeyboard({
+/** Color-scheme L/R finger coach — can sit inside or outside the keyboard chrome. */
+export function FingerPlacementGuide({
   highlightKeys = [],
-  showGuide = false,
-  onKeyPress,
-  disabled = false,
-}: Props) {
-  const highlight = new Set(highlightKeys.map((k) => k.toLowerCase()))
+  className = '',
+}: {
+  highlightKeys?: string[]
+  className?: string
+}) {
   const primary = highlightKeys[0]?.toLowerCase() ?? null
   const activeFinger = primary ? fingerForLetter(primary) : null
   const tipFinger = activeFinger && activeFinger !== 'th' ? activeFinger : null
 
   return (
-    <div className="typing-keyboard" role="group" aria-label="Finger guide keyboard">
+    <div className={`tk-guide ${className}`.trim()} aria-live="polite">
+      <HandGuide side="left" activeFinger={activeFinger} />
+      <p className="tk-coach">
+        {tipFinger ? (
+          <>
+            Use your <strong>{FINGER_LABELS[tipFinger].toLowerCase()}</strong>
+            {primary ? (
+              <>
+                {' '}
+                for{' '}
+                <span
+                  className="tk-coach-key"
+                  style={{ background: colorForLetter(primary) }}
+                >
+                  {primary.toUpperCase()}
+                </span>
+              </>
+            ) : null}
+          </>
+        ) : (
+          <>
+            Rest fingers on the <strong>home row</strong> — bumps on{' '}
+            <span className="tk-coach-key" style={{ background: FINGER_COLORS.li }}>
+              F
+            </span>{' '}
+            and{' '}
+            <span className="tk-coach-key" style={{ background: FINGER_COLORS.ri }}>
+              J
+            </span>
+          </>
+        )}
+      </p>
+      <HandGuide side="right" activeFinger={activeFinger} />
+    </div>
+  )
+}
+
+export function TypingKeyboard({
+  highlightKeys = [],
+  showGuide = false,
+  showHomePlacement = false,
+  showFingerLabels = false,
+  onKeyPress,
+  disabled = false,
+}: Props) {
+  const highlight = new Set(highlightKeys.map((k) => k.toLowerCase()))
+  const labelHome = showHomePlacement || showFingerLabels
+
+  return (
+    <div
+      className={`typing-keyboard ${labelHome ? 'show-home-placement' : ''} ${showFingerLabels ? 'show-finger-labels' : ''}`}
+      role="group"
+      aria-label="Finger guide keyboard"
+    >
       <div className="tk-board">
         {KEYBOARD_ROWS.map((row, rowIndex) => (
           <div
@@ -76,6 +149,7 @@ export function TypingKeyboard({
             {row.map((letter) => {
               const isHome = HOME_KEYS.has(letter)
               const isHot = highlight.has(letter)
+              const isBump = letter === 'f' || letter === 'j'
               const color = colorForLetter(letter)
               const finger = fingerForLetter(letter)
               const label = finger ? FINGER_LABELS[finger] : letter
@@ -87,13 +161,19 @@ export function TypingKeyboard({
                   className={[
                     'tk-key',
                     isHome ? 'is-home' : '',
+                    labelHome && isHome ? 'is-home-rest' : '',
                     isHot ? 'is-hot' : '',
-                    letter === 'f' || letter === 'j' ? 'has-bump' : '',
+                    isBump ? 'has-bump' : '',
+                    labelHome && isBump ? 'is-bump-guide' : '',
+                    isHot && finger ? 'is-finger-target' : '',
                   ]
                     .filter(Boolean)
                     .join(' ')}
+                  data-key={letter}
                   style={{ ['--tk-color' as string]: color }}
-                  aria-label={`${letter.toUpperCase()}, ${label}`}
+                  aria-label={`${letter.toUpperCase()}, ${label}${
+                    labelHome && isHome ? ', home row resting key' : ''
+                  }`}
                   disabled={disabled || !onKeyPress}
                   tabIndex={onKeyPress ? 0 : -1}
                   onPointerDown={(e) => {
@@ -103,9 +183,15 @@ export function TypingKeyboard({
                   }}
                 >
                   <span className="tk-label">{letter.toUpperCase()}</span>
-                  {(letter === 'f' || letter === 'j') && (
-                    <span className="tk-bump" aria-hidden="true" />
-                  )}
+                  {isBump && <span className="tk-bump" aria-hidden="true" />}
+                  {showFingerLabels && isHome && finger ? (
+                    <span className="tk-finger-label">{FINGER_SHORT[finger]}</span>
+                  ) : null}
+                  {labelHome && isBump ? (
+                    <span className="tk-bump-tag" aria-hidden="true">
+                      bump
+                    </span>
+                  ) : null}
                 </button>
               )
             })}
@@ -115,53 +201,28 @@ export function TypingKeyboard({
         <div className="tk-row tk-row-space">
           <button
             type="button"
-            className="tk-key tk-space"
+            className={[
+              'tk-key',
+              'tk-space',
+              labelHome ? 'is-home-rest' : '',
+            ]
+              .filter(Boolean)
+              .join(' ')}
+            data-key="space"
             style={{ ['--tk-color' as string]: FINGER_COLORS.th }}
             aria-label="Space, thumbs"
             disabled
             tabIndex={-1}
           >
             <span className="tk-label">space</span>
+            {showFingerLabels ? (
+              <span className="tk-finger-label tk-finger-label-space">thumbs</span>
+            ) : null}
           </button>
         </div>
       </div>
 
-      {showGuide ? (
-        <div className="tk-guide">
-          <HandGuide side="left" activeFinger={activeFinger} />
-          <p className="tk-coach">
-            {tipFinger ? (
-              <>
-                Use your <strong>{FINGER_LABELS[tipFinger].toLowerCase()}</strong>
-                {primary ? (
-                  <>
-                    {' '}
-                    for{' '}
-                    <span
-                      className="tk-coach-key"
-                      style={{ background: colorForLetter(primary) }}
-                    >
-                      {primary.toUpperCase()}
-                    </span>
-                  </>
-                ) : null}
-              </>
-            ) : (
-              <>
-                Rest fingers on the <strong>home row</strong> — bumps on{' '}
-                <span className="tk-coach-key" style={{ background: FINGER_COLORS.li }}>
-                  F
-                </span>{' '}
-                and{' '}
-                <span className="tk-coach-key" style={{ background: FINGER_COLORS.ri }}>
-                  J
-                </span>
-              </>
-            )}
-          </p>
-          <HandGuide side="right" activeFinger={activeFinger} />
-        </div>
-      ) : null}
+      {showGuide ? <FingerPlacementGuide highlightKeys={highlightKeys} /> : null}
     </div>
   )
 }

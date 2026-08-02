@@ -12,6 +12,7 @@ import {
 import type { AdaptiveState } from '../../shared/math/types'
 import { useProgressStore } from '../../shared/store/progressStore'
 import { AstroFox } from './AstroFox'
+import { TypingFoundation } from './foundation/TypingFoundation'
 import { RocketWord } from './RocketWord'
 import { TypingKeyboard } from './TypingKeyboard'
 import {
@@ -23,6 +24,8 @@ import {
   typingConfigForLevel,
 } from './wordBank'
 import './typingTheme.css'
+
+type Mode = 'idle' | 'rockets' | 'foundation'
 
 type FallingWord = {
   id: string
@@ -69,7 +72,8 @@ export function TypingGame() {
   const resetGame = useProgressStore((s) => s.resetGame)
   const { muted, setMuted, playSfx } = useGameMusic('typing')
 
-  const [playing, setPlaying] = useState(false)
+  const [mode, setMode] = useState<Mode>('idle')
+  const playing = mode === 'rockets'
   const [words, setWords] = useState<FallingWord[]>([])
   const [activeId, setActiveId] = useState<string | null>(null)
   const [typedCount, setTypedCount] = useState(0)
@@ -326,7 +330,7 @@ export function TypingGame() {
   }, [playing, pressChar])
 
   const start = () => {
-    setPlaying(true)
+    setMode('rockets')
     setWords([])
     wordsRef.current = []
     setActiveId(null)
@@ -339,6 +343,19 @@ export function TypingGame() {
     lastTs.current = null
     window.setTimeout(() => spawnWord(), 400)
   }
+
+  const returnToIdle = () => {
+    setMode('idle')
+    setWords([])
+    wordsRef.current = []
+    setActiveId(null)
+    setTypedCount(0)
+    setBanner(null)
+    setLevelReward(null)
+    setRecovering(false)
+  }
+
+  const suggestWarmup = saved.level <= 1 && saved.wrongStreak >= 2
 
   const config = typingConfigForLevel(saved.level)
   const atMaxOrbit = saved.level >= TYPING_MAX_LEVEL
@@ -365,175 +382,208 @@ export function TypingGame() {
   })()
 
   return (
-    <main className={`typing-shell ${playing ? 'is-playing' : ''}`}>
+    <main
+      className={`typing-shell ${playing ? 'is-playing' : ''} ${mode === 'foundation' ? 'is-foundation' : ''}`}
+    >
       <div className="typing-sky" aria-hidden="true" />
-      <header className="typing-top">
-        <Link className="typing-back" to="/">
-          ← Home
-        </Link>
-        <div className="typing-brand">
-          <h1 className="typing-title">Fox Rockets</h1>
-          <div className="typing-hud" aria-label="Game stats">
-            <div className="typing-stat">
-              <span>Score</span>
-              <strong>{saved.score}</strong>
-            </div>
-            <div className="typing-stat typing-orbit-stat">
-              <span>Orbit</span>
-              <strong>
-                {saved.level}
-                <span className="typing-orbit-stars" aria-hidden="true">
-                  {'★'.repeat(saved.level)}
-                  {'☆'.repeat(TYPING_MAX_LEVEL - saved.level)}
-                </span>
-              </strong>
-            </div>
-            <div
-              className="typing-stat typing-lives"
-              aria-label={`${lives} lives`}
-            >
-              <span>Lives</span>
-              <strong>
-                {'♥'.repeat(lives)}
-                {'♡'.repeat(MAX_LIVES - lives)}
-              </strong>
-            </div>
-          </div>
-          {playing ? (
-            <div
-              className="typing-orbit-progress"
-              aria-label={
-                atMaxOrbit
-                  ? 'Max orbit reached'
-                  : `${progressForBar} of ${TYPING_CORRECT_PER_LEVEL} rockets to next orbit`
-              }
-            >
-              <div className="typing-orbit-progress-label">
-                {atMaxOrbit ? (
-                  <span>Max orbit · Star Captain!</span>
-                ) : (
-                  <span>
-                    Next orbit · {progressForBar}/{TYPING_CORRECT_PER_LEVEL}
-                  </span>
-                )}
-              </div>
-              <div className="typing-orbit-track">
+
+      {mode === 'foundation' ? (
+        <TypingFoundation
+          muted={muted}
+          onToggleMute={() => setMuted(!muted)}
+          onBack={returnToIdle}
+          onPlayRockets={start}
+          onReset={() => {
+            resetGame('typing')
+            returnToIdle()
+          }}
+          playSfx={playSfx}
+        />
+      ) : (
+        <>
+          <header className="typing-top">
+            <Link className="typing-back" to="/">
+              ← Home
+            </Link>
+            <div className="typing-brand">
+              <h1 className="typing-title">Fox Rockets</h1>
+              <div className="typing-hud" aria-label="Game stats">
+                <div className="typing-stat">
+                  <span>Score</span>
+                  <strong>{saved.score}</strong>
+                </div>
+                <div className="typing-stat typing-orbit-stat">
+                  <span>Orbit</span>
+                  <strong>
+                    {saved.level}
+                    <span className="typing-orbit-stars" aria-hidden="true">
+                      {'★'.repeat(saved.level)}
+                      {'☆'.repeat(TYPING_MAX_LEVEL - saved.level)}
+                    </span>
+                  </strong>
+                </div>
                 <div
-                  className="typing-orbit-fill"
-                  style={{
-                    width: `${(progressForBar / TYPING_CORRECT_PER_LEVEL) * 100}%`,
-                  }}
-                />
+                  className="typing-stat typing-lives"
+                  aria-label={`${lives} lives`}
+                >
+                  <span>Lives</span>
+                  <strong>
+                    {'♥'.repeat(lives)}
+                    {'♡'.repeat(MAX_LIVES - lives)}
+                  </strong>
+                </div>
               </div>
+              {playing ? (
+                <div
+                  className="typing-orbit-progress"
+                  aria-label={
+                    atMaxOrbit
+                      ? 'Max orbit reached'
+                      : `${progressForBar} of ${TYPING_CORRECT_PER_LEVEL} rockets to next orbit`
+                  }
+                >
+                  <div className="typing-orbit-progress-label">
+                    {atMaxOrbit ? (
+                      <span>Max orbit · Star Captain!</span>
+                    ) : (
+                      <span>
+                        Next orbit · {progressForBar}/{TYPING_CORRECT_PER_LEVEL}
+                      </span>
+                    )}
+                  </div>
+                  <div className="typing-orbit-track">
+                    <div
+                      className="typing-orbit-fill"
+                      style={{
+                        width: `${(progressForBar / TYPING_CORRECT_PER_LEVEL) * 100}%`,
+                      }}
+                    />
+                  </div>
+                </div>
+              ) : null}
+            </div>
+            <div className="typing-actions">
+              <MusicToggle muted={muted} onToggle={() => setMuted(!muted)} />
+              <button
+                type="button"
+                className="typing-reset"
+                onClick={() => {
+                  resetGame('typing')
+                  returnToIdle()
+                }}
+              >
+                Reset
+              </button>
+            </div>
+          </header>
+
+          <section className="typing-arena" aria-label="Rocket words arena">
+            <BurstParticles trigger={burstKey} palette="race" />
+            <ScorePop points={popPoints} keyId={popKey} />
+
+            <div className="typing-buddy" aria-hidden={!playing}>
+              <AstroFox
+                size="sm"
+                motion={playing ? 'hop' : 'sway'}
+                celebrate={celebrating || levelReward != null}
+              />
+              {!playing ? (
+                <p className="typing-buddy-note">
+                  Clear {TYPING_CORRECT_PER_LEVEL} rockets to unlock each orbit
+                </p>
+              ) : (
+                <p className="typing-buddy-note">
+                  Up to {config.maxWords} rocket{config.maxWords > 1 ? 's' : ''}
+                </p>
+              )}
+            </div>
+
+            {!playing ? (
+              <div className="typing-start">
+                <h2>Launch the rockets!</h2>
+                <p>
+                  Word rockets drift down from the stars. Type them before they
+                  land on the planet. Earn a space badge every orbit — take your
+                  time, levels stay gentle for growing typists.
+                </p>
+                {suggestWarmup ? (
+                  <p className="typing-start-nudge">
+                    Need a warm-up? Try Finger Practice.
+                  </p>
+                ) : null}
+                <div className="typing-start-actions">
+                  <button
+                    type="button"
+                    className="typing-start-btn"
+                    onClick={start}
+                  >
+                    Start Fox Rockets
+                  </button>
+                  <button
+                    type="button"
+                    className="typing-start-btn-secondary"
+                    onClick={() => setMode('foundation')}
+                  >
+                    Finger Practice
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                {words.map((w) => {
+                  const isActive = w.id === activeId
+                  const matched = isActive ? w.text.slice(0, typedCount) : ''
+                  const rest = isActive ? w.text.slice(typedCount) : w.text
+                  return (
+                    <RocketWord
+                      key={w.id}
+                      id={w.id}
+                      x={w.x}
+                      y={w.y}
+                      matched={matched}
+                      rest={rest}
+                      active={isActive}
+                    />
+                  )
+                })}
+                <div className="typing-ground" aria-hidden="true" />
+              </>
+            )}
+
+            {levelReward ? (
+              <div className="typing-reward" role="status" aria-live="polite">
+                <div className="typing-reward-badge" aria-hidden="true">
+                  <span className="typing-reward-star">★</span>
+                </div>
+                <h2>Orbit {levelReward.level} unlocked!</h2>
+                <p className="typing-reward-name">{levelReward.label}</p>
+                <p className="typing-reward-bonus">+{levelReward.bonus} points</p>
+                <AstroFox size="md" motion="hop" celebrate />
+              </div>
+            ) : null}
+
+            {banner && !levelReward ? (
+              <p className="typing-banner">{banner}</p>
+            ) : null}
+          </section>
+
+          {playing ? (
+            <div className="typing-controls">
+              <TypingKeyboard
+                highlightKeys={highlightKeys}
+                showGuide={saved.level <= 3}
+                onKeyPress={pressChar}
+                disabled={recovering || levelReward != null}
+              />
+              <p className="typing-tip">
+                {saved.level <= 3
+                  ? 'Match key colors to your fingers · type the lowest rocket first'
+                  : 'Tip: type the lowest rocket first · Esc cancels your current word'}
+              </p>
             </div>
           ) : null}
-        </div>
-        <div className="typing-actions">
-          <MusicToggle muted={muted} onToggle={() => setMuted(!muted)} />
-          <button
-            type="button"
-            className="typing-reset"
-            onClick={() => {
-              resetGame('typing')
-              setPlaying(false)
-              setWords([])
-              wordsRef.current = []
-              setBanner(null)
-              setLevelReward(null)
-            }}
-          >
-            Reset
-          </button>
-        </div>
-      </header>
-
-      <section className="typing-arena" aria-label="Rocket words arena">
-        <BurstParticles trigger={burstKey} palette="race" />
-        <ScorePop points={popPoints} keyId={popKey} />
-
-        <div className="typing-buddy" aria-hidden={!playing}>
-          <AstroFox
-            size="sm"
-            motion={playing ? 'hop' : 'sway'}
-            celebrate={celebrating || levelReward != null}
-          />
-          {!playing ? (
-            <p className="typing-buddy-note">
-              Clear {TYPING_CORRECT_PER_LEVEL} rockets to unlock each orbit
-            </p>
-          ) : (
-            <p className="typing-buddy-note">
-              Up to {config.maxWords} rocket{config.maxWords > 1 ? 's' : ''}
-            </p>
-          )}
-        </div>
-
-        {!playing ? (
-          <div className="typing-start">
-            <h2>Launch the rockets!</h2>
-            <p>
-              Word rockets drift down from the stars. Type them before they land
-              on the planet. Earn a space badge every orbit — take your time,
-              levels stay gentle for growing typists.
-            </p>
-            <button type="button" className="typing-start-btn" onClick={start}>
-              Start Fox Rockets
-            </button>
-          </div>
-        ) : (
-          <>
-            {words.map((w) => {
-              const isActive = w.id === activeId
-              const matched = isActive ? w.text.slice(0, typedCount) : ''
-              const rest = isActive ? w.text.slice(typedCount) : w.text
-              return (
-                <RocketWord
-                  key={w.id}
-                  id={w.id}
-                  x={w.x}
-                  y={w.y}
-                  matched={matched}
-                  rest={rest}
-                  active={isActive}
-                />
-              )
-            })}
-            <div className="typing-ground" aria-hidden="true" />
-          </>
-        )}
-
-        {levelReward ? (
-          <div className="typing-reward" role="status" aria-live="polite">
-            <div className="typing-reward-badge" aria-hidden="true">
-              <span className="typing-reward-star">★</span>
-            </div>
-            <h2>Orbit {levelReward.level} unlocked!</h2>
-            <p className="typing-reward-name">{levelReward.label}</p>
-            <p className="typing-reward-bonus">+{levelReward.bonus} points</p>
-            <AstroFox size="md" motion="hop" celebrate />
-          </div>
-        ) : null}
-
-        {banner && !levelReward ? (
-          <p className="typing-banner">{banner}</p>
-        ) : null}
-      </section>
-
-      {playing ? (
-        <div className="typing-controls">
-          <TypingKeyboard
-            highlightKeys={highlightKeys}
-            showGuide={saved.level <= 3}
-            onKeyPress={pressChar}
-            disabled={recovering || levelReward != null}
-          />
-          <p className="typing-tip">
-            {saved.level <= 3
-              ? 'Match key colors to your fingers · type the lowest rocket first'
-              : 'Tip: type the lowest rocket first · Esc cancels your current word'}
-          </p>
-        </div>
-      ) : null}
+        </>
+      )}
     </main>
   )
 }

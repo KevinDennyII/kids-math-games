@@ -17,26 +17,39 @@
   display: flex;
   flex-direction: column;
   gap: 0.18rem;
-  align-items: center;
+  align-items: stretch;
+  width: max-content;
+  max-width: 100%;
+  margin-inline: auto;
 }
 
 .tk-row {
   display: flex;
   justify-content: center;
   gap: 0.18rem;
-  width: 100%;
+  width: max-content;
+  max-width: 100%;
   padding-left: var(--tk-offset, 0);
+  box-sizing: border-box;
 }
 
 .tk-row-space {
-  display: none;
+  display: flex;
+  justify-content: center;
+  align-self: stretch;
+  width: auto;
+  max-width: none;
+  margin-top: 0.12rem;
+  padding-left: 0 !important;
 }
 
 .tk-key {
   --tk-color: #64748b;
   position: relative;
   flex: 1 1 0;
+  width: 2.35rem;
   max-width: 2.35rem;
+  min-width: 0;
   aspect-ratio: 1 / 1;
   min-height: 0;
   border: 2px solid rgb(0 0 0 / 0.35);
@@ -57,6 +70,28 @@
   touch-action: manipulation;
   user-select: none;
   padding: 0;
+}
+
+/* After .tk-key so letter sizing doesn't clip the bar to one key */
+.tk-key.tk-space {
+  flex: 1 1 auto;
+  width: 100%;
+  max-width: none;
+  aspect-ratio: auto;
+  height: clamp(1.35rem, 4.5vw, 1.75rem);
+  min-height: 1.35rem;
+  border-radius: 8px;
+  font-size: clamp(0.6rem, 1.6vw, 0.72rem);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.95;
+}
+
+.tk-space.is-home-rest:not(.is-hot) {
+  outline: 2px solid rgb(255 255 255 / 0.72);
+  outline-offset: -3px;
+  filter: brightness(1.08);
+  animation: tk-home-rest-pulse 1.8s ease-in-out infinite alternate;
 }
 
 .tk-key:not(:disabled) {
@@ -97,19 +132,6 @@
 .tk-label {
   display: block;
   text-shadow: 0 1px 1px rgb(0 0 0 / 0.35);
-}
-
-.tk-space {
-  flex: 0 1 auto;
-  width: min(55%, 14rem);
-  max-width: none;
-  aspect-ratio: 6 / 1;
-  min-height: 1.1rem;
-  border-radius: 8px;
-  font-size: clamp(0.6rem, 1.6vw, 0.72rem);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  opacity: 0.95;
 }
 
 .tk-guide {
@@ -226,6 +248,130 @@
   box-shadow: 0 2px 0 rgb(0 0 0 / 0.2);
 }
 
+/* Beginner home-row parking spots */
+.tk-key.is-home-rest:not(.is-hot) {
+  outline: 2px solid rgb(255 255 255 / 0.72);
+  outline-offset: -3px;
+  filter: brightness(1.08);
+  animation: tk-home-rest-pulse 1.8s ease-in-out infinite alternate;
+}
+
+.tk-key.is-home-rest.is-hot {
+  outline-color: #fff;
+}
+
+.tk-rest-dot {
+  position: absolute;
+  left: 50%;
+  top: 12%;
+  width: 28%;
+  max-width: 0.55rem;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  transform: translateX(-50%);
+  box-shadow: 0 0 0 1.5px rgb(255 255 255 / 0.85);
+  pointer-events: none;
+}
+
+.tk-rest-dot-space {
+  top: 50%;
+  left: 28%;
+  width: 0.45rem;
+  max-width: none;
+  transform: translate(-50%, -50%);
+}
+
+.tk-rest-dot-space::after {
+  content: '';
+  position: absolute;
+  left: 220%;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: inherit;
+  box-shadow: inherit;
+}
+
+.tk-bump-tag {
+  position: absolute;
+  left: 50%;
+  bottom: -0.05rem;
+  transform: translate(-50%, 85%);
+  padding: 0.08rem 0.28rem;
+  border-radius: 999px;
+  background: rgb(8 16 36 / 0.92);
+  border: 1px solid rgb(255 246 213 / 0.55);
+  color: #fff6d5;
+  font-family: var(--font-display);
+  font-size: 0.48rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.tk-finger-label {
+  position: absolute;
+  left: 50%;
+  bottom: 0.2rem;
+  transform: translateX(-50%);
+  max-width: 92%;
+  padding: 0.05rem 0.2rem;
+  border-radius: 0.3rem;
+  background: rgb(8 16 36 / 0.82);
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: clamp(0.42rem, 1.2vw, 0.55rem);
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: lowercase;
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.tk-finger-label-space {
+  bottom: 0.35rem;
+  font-size: clamp(0.55rem, 1.5vw, 0.7rem);
+  padding: 0.1rem 0.45rem;
+}
+
+.typing-keyboard.show-finger-labels .tk-key.is-home-rest .tk-label {
+  transform: translateY(-0.35rem);
+}
+
+.typing-keyboard.show-finger-labels .tk-key {
+  overflow: visible;
+}
+
+.tk-key.is-bump-guide {
+  overflow: visible;
+  z-index: 2;
+}
+
+.typing-keyboard.show-home-placement .tk-row-1 {
+  position: relative;
+}
+
+@keyframes tk-home-rest-pulse {
+  from {
+    box-shadow:
+      0 2px 0 rgb(0 0 0 / 0.28),
+      0 0 0 0 rgb(255 246 213 / 0);
+  }
+  to {
+    box-shadow:
+      0 2px 0 rgb(0 0 0 / 0.28),
+      0 0 12px 2px rgb(255 246 213 / 0.35);
+  }
+}
+
 @media (max-width: 520px) {
   .typing-keyboard {
     padding: 0.25rem 0.28rem 0.3rem;
@@ -237,6 +383,7 @@
   }
 
   .tk-key {
+    width: 1.95rem;
     max-width: 1.95rem;
     border-radius: 5px;
     border-width: 1.5px;
@@ -271,6 +418,7 @@
   }
 
   .tk-key {
+    width: 2rem;
     max-width: 2rem;
     border-width: 1.5px;
   }
@@ -331,6 +479,7 @@
   }
 
   .tk-key {
+    width: 1.7rem;
     max-width: 1.7rem;
   }
 
@@ -346,5 +495,9 @@
 
   .tk-finger.is-active {
     transform: none;
+  }
+
+  .tk-key.is-home-rest:not(.is-hot) {
+    animation: none;
   }
 }
