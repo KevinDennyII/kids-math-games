@@ -94,12 +94,25 @@ export function TypingGame() {
   const pausedRef = useRef(false)
   const lastTs = useRef<number | null>(null)
   const spawnAcc = useRef(0)
+  /** Live rocket nodes — fall position is written here, not via setState. */
+  const rocketEls = useRef(new Map<string, HTMLDivElement>())
+
+  const registerRocketEl = useCallback((id: string, el: HTMLDivElement | null) => {
+    if (el) rocketEls.current.set(id, el)
+    else rocketEls.current.delete(id)
+  }, [])
 
   useEffect(() => {
     stateRef.current = saved
   }, [saved])
   useEffect(() => {
-    wordsRef.current = words
+    // Keep fall positions from the RAF loop — React state only owns membership /
+    // identity; overwriting y here snaps rockets on every keystroke or spawn.
+    const liveY = new Map(wordsRef.current.map((w) => [w.id, w.y]))
+    wordsRef.current = words.map((w) => ({
+      ...w,
+      y: liveY.get(w.id) ?? w.y,
+    }))
   }, [words])
   useEffect(() => {
     activeRef.current = activeId
@@ -125,15 +138,17 @@ export function TypingGame() {
   const spawnWord = useCallback(() => {
     const existing = wordsRef.current.map((w) => w.text)
     const text = pickWord(stateRef.current.level, existing)
-    setWords((prev) => [
-      ...prev,
+    const next = [
+      ...wordsRef.current,
       {
         id: uid(),
         text,
         x: 12 + Math.random() * 76,
         y: -4,
       },
-    ])
+    ]
+    wordsRef.current = next
+    setWords(next)
   }, [])
 
   const handleMisses = useCallback(
@@ -202,6 +217,12 @@ export function TypingGame() {
       const missed = moved.filter((w) => w.y >= 92)
       const kept = moved.filter((w) => w.y < 92)
 
+      // Move rockets in the DOM — do NOT setState every frame (Pi Chromium melts).
+      for (const w of kept) {
+        const el = rocketEls.current.get(w.id)
+        if (el) el.style.top = `${w.y}%`
+      }
+
       if (missed.length > 0) {
         const missedActive = missed.some((w) => w.id === activeRef.current)
         wordsRef.current = kept
@@ -212,7 +233,6 @@ export function TypingGame() {
         )
       } else {
         wordsRef.current = moved
-        setWords(moved)
       }
 
       if (
@@ -534,15 +554,20 @@ export function TypingGame() {
                   const isActive = w.id === activeId
                   const matched = isActive ? w.text.slice(0, typedCount) : ''
                   const rest = isActive ? w.text.slice(typedCount) : w.text
+                  // Prefer live Y from the animation ref so keystroke re-renders
+                  // don't snap rockets back to a stale React state position.
+                  const y =
+                    wordsRef.current.find((live) => live.id === w.id)?.y ?? w.y
                   return (
                     <RocketWord
                       key={w.id}
                       id={w.id}
                       x={w.x}
-                      y={w.y}
+                      y={y}
                       matched={matched}
                       rest={rest}
                       active={isActive}
+                      registerEl={registerRocketEl}
                     />
                   )
                 })}

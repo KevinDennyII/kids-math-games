@@ -1,3 +1,5 @@
+import { useEffect, useRef } from 'react'
+
 const ROCKET_SKINS = ['rocket-mint', 'rocket-sky', 'rocket-ember'] as const
 
 function rocketSkin(id: string) {
@@ -13,11 +15,32 @@ type Props = {
   matched: string
   rest: string
   active: boolean
+  /** Register the node so the game loop can update `top` without React. */
+  registerEl?: (id: string, el: HTMLDivElement | null) => void
 }
 
-export function RocketWord({ id, x, y, matched, rest, active }: Props) {
+/** Position (`top`) is also updated imperatively by the game loop — avoid putting
+ *  fall motion through React state every frame (kills low-power devices). */
+export function RocketWord({
+  id,
+  x,
+  y,
+  matched,
+  rest,
+  active,
+  registerEl,
+}: Props) {
+  const nodeRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!registerEl) return
+    registerEl(id, nodeRef.current)
+    return () => registerEl(id, null)
+  }, [id, registerEl])
+
   return (
     <div
+      ref={nodeRef}
       className={`falling-word ${rocketSkin(id)} ${active ? 'is-active' : ''}`}
       style={{ left: `${x}%`, top: `${y}%` }}
     >
