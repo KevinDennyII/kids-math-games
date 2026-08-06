@@ -19,7 +19,13 @@ function writeMuted(muted: boolean) {
   }
 }
 
-export function useGameMusic(theme: MusicTheme) {
+type Options = {
+  /** When false, skip the looping theme (SFX still work). Saves CPU on Pi/Firefox. */
+  themeEnabled?: boolean
+}
+
+export function useGameMusic(theme: MusicTheme, options: Options = {}) {
+  const themeEnabled = options.themeEnabled !== false
   const [muted, setMutedState] = useState(readMuted)
 
   useEffect(() => {
@@ -27,6 +33,11 @@ export function useGameMusic(theme: MusicTheme) {
   }, [muted])
 
   useEffect(() => {
+    if (!themeEnabled) {
+      musicEngine.stop()
+      return
+    }
+
     const start = () => {
       void musicEngine.playTheme(theme)
     }
@@ -46,13 +57,13 @@ export function useGameMusic(theme: MusicTheme) {
       window.removeEventListener('keydown', unlock)
       musicEngine.stop()
     }
-  }, [theme])
+  }, [theme, themeEnabled])
 
   const setMuted = (next: boolean) => {
     setMutedState(next)
     writeMuted(next)
     musicEngine.setMuted(next)
-    if (!next) {
+    if (!next && themeEnabled) {
       void musicEngine.playTheme(theme)
     }
   }

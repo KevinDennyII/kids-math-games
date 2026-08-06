@@ -4,6 +4,7 @@ import { MusicToggle } from '../../shared/audio/MusicToggle'
 import { useGameMusic } from '../../shared/audio/useGameMusic'
 import { BurstParticles } from '../../shared/motion/BurstParticles'
 import { ScorePop } from '../../shared/motion/ScorePop'
+import { useLowPowerMode } from '../../shared/motion/useLowPowerMode'
 import {
   applyAnswer,
   progressTowardNextLevel,
@@ -70,7 +71,10 @@ export function TypingGame() {
   const saved = useProgressStore((s) => s.typing)
   const setTyping = useProgressStore((s) => s.setTyping)
   const resetGame = useProgressStore((s) => s.resetGame)
-  const { muted, setMuted, playSfx } = useGameMusic('typing')
+  const lite = useLowPowerMode()
+  const { muted, setMuted, playSfx } = useGameMusic('typing', {
+    themeEnabled: !lite,
+  })
 
   const [mode, setMode] = useState<Mode>('idle')
   const playing = mode === 'rockets'
@@ -93,7 +97,9 @@ export function TypingGame() {
   const playingRef = useRef(playing)
   const pausedRef = useRef(false)
   const lastTs = useRef<number | null>(null)
+  const lastPaint = useRef(0)
   const spawnAcc = useRef(0)
+  const liteRef = useRef(lite)
   /** Live rocket nodes — fall position is written here, not via setState. */
   const rocketEls = useRef(new Map<string, HTMLDivElement>())
 
@@ -101,6 +107,10 @@ export function TypingGame() {
     if (el) rocketEls.current.set(id, el)
     else rocketEls.current.delete(id)
   }, [])
+
+  useEffect(() => {
+    liteRef.current = lite
+  }, [lite])
 
   useEffect(() => {
     stateRef.current = saved
@@ -194,12 +204,16 @@ export function TypingGame() {
     if (!playing) return
 
     let raf = 0
+    // ~20fps on Pi/Firefox — falling words don't need 60fps paint.
+    const minFrameMs = () => (liteRef.current ? 50 : 0)
+
     const tick = (ts: number) => {
       if (!playingRef.current) return
 
+      raf = requestAnimationFrame(tick)
+
       if (pausedRef.current) {
         lastTs.current = ts
-        raf = requestAnimationFrame(tick)
         return
       }
 
@@ -217,10 +231,14 @@ export function TypingGame() {
       const missed = moved.filter((w) => w.y >= 92)
       const kept = moved.filter((w) => w.y < 92)
 
-      // Move rockets in the DOM — do NOT setState every frame (Pi Chromium melts).
-      for (const w of kept) {
-        const el = rocketEls.current.get(w.id)
-        if (el) el.style.top = `${w.y}%`
+      const shouldPaint = ts - lastPaint.current >= minFrameMs()
+      if (shouldPaint) {
+        lastPaint.current = ts
+        // Move rockets in the DOM — do NOT setState every frame.
+        for (const w of kept) {
+          const el = rocketEls.current.get(w.id)
+          if (el) el.style.top = `${w.y}%`
+        }
       }
 
       if (missed.length > 0) {
@@ -243,8 +261,6 @@ export function TypingGame() {
         spawnAcc.current = 0
         spawnWord()
       }
-
-      raf = requestAnimationFrame(tick)
     }
 
     raf = requestAnimationFrame(tick)
@@ -286,9 +302,11 @@ export function TypingGame() {
 
       if (typed >= target.text.length) {
         playSfx('correct')
-        setBurstKey((k) => k + 1)
-        setCelebrating(true)
-        window.setTimeout(() => setCelebrating(false), 500)
+        if (!liteRef.current) {
+          setBurstKey((k) => k + 1)
+          setCelebrating(true)
+          window.setTimeout(() => setCelebrating(false), 500)
+        }
 
         const result = applyAnswer(stateRef.current, true, TYPING_ADAPTIVE)
         persist(result.state)
@@ -403,9 +421,9 @@ export function TypingGame() {
 
   return (
     <main
-      className={`typing-shell ${playing ? 'is-playing' : ''} ${mode === 'foundation' ? 'is-foundation' : ''}`}
+      className={`typing-shell ${playing ? 'is-playing' : ''} ${mode === 'foundation' ? 'is-foundation' : ''} ${lite ? 'is-lite' : ''}`}
     >
-      <div className="typing-sky" aria-hidden="true" />
+      {lite ? null : <div className="typing-sky" aria-hidden="true" />}
 
       {mode === 'foundation' ? (
         <TypingFoundation
@@ -498,14 +516,18 @@ export function TypingGame() {
           </header>
 
           <section className="typing-arena" aria-label="Rocket words arena">
-            <BurstParticles trigger={burstKey} palette="race" />
-            <ScorePop points={popPoints} keyId={popKey} />
+            {!lite ? (
+              <BurstParticles trigger={burstKey} palette="race" />
+            ) : null}
+            {!lite ? (
+              <ScorePop points={popPoints} keyId={popKey} />
+            ) : null}
 
             <div className="typing-buddy" aria-hidden={!playing}>
               <AstroFox
                 size="sm"
-                motion={playing ? 'hop' : 'sway'}
-                celebrate={celebrating || levelReward != null}
+                motion={lite ? 'none' : playing ? 'hop' : 'sway'}
+                celebrate={!lite && (celebrating || levelReward != null)}
               />
               {!playing ? (
                 <p className="typing-buddy-note">
@@ -568,6 +590,7 @@ export function TypingGame() {
                       rest={rest}
                       active={isActive}
                       registerEl={registerRocketEl}
+                      lite={lite}
                     />
                   )
                 })}
@@ -577,13 +600,15 @@ export function TypingGame() {
 
             {levelReward ? (
               <div className="typing-reward" role="status" aria-live="polite">
-                <div className="typing-reward-badge" aria-hidden="true">
-                  <span className="typing-reward-star">★</span>
-                </div>
+                {!lite ? (
+                  <div className="typing-reward-badge" aria-hidden="true">
+                    <span className="typing-reward-star">★</span>
+                  </div>
+                ) : null}
                 <h2>Orbit {levelReward.level} unlocked!</h2>
                 <p className="typing-reward-name">{levelReward.label}</p>
                 <p className="typing-reward-bonus">+{levelReward.bonus} points</p>
-                <AstroFox size="md" motion="hop" celebrate />
+                {!lite ? <AstroFox size="md" motion="hop" celebrate /> : null}
               </div>
             ) : null}
 
@@ -594,17 +619,54 @@ export function TypingGame() {
 
           {playing ? (
             <div className="typing-controls">
-              <TypingKeyboard
-                highlightKeys={highlightKeys}
-                showGuide={saved.level <= 3}
-                onKeyPress={pressChar}
-                disabled={recovering || levelReward != null}
-              />
-              <p className="typing-tip">
-                {saved.level <= 3
-                  ? 'Match key colors to your fingers · type the lowest rocket first'
-                  : 'Tip: type the lowest rocket first · Esc cancels your current word'}
-              </p>
+              {lite ? (
+                <div className="typing-lite-coach" aria-live="polite">
+                  {highlightKeys.length > 0 ? (
+                    <>
+                      <span className="typing-lite-coach-label">Type</span>
+                      <div className="typing-lite-keys">
+                        {highlightKeys.map((k) => (
+                          <button
+                            key={k}
+                            type="button"
+                            className="typing-lite-key"
+                            onPointerDown={(e) => {
+                              e.preventDefault()
+                              if (recovering || levelReward != null) return
+                              pressChar(k)
+                            }}
+                            disabled={recovering || levelReward != null}
+                          >
+                            {k.toUpperCase()}
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  ) : (
+                    <span className="typing-lite-coach-label">
+                      Type the lowest rocket
+                    </span>
+                  )}
+                </div>
+              ) : (
+                <TypingKeyboard
+                  highlightKeys={highlightKeys}
+                  showGuide={saved.level <= 3}
+                  onKeyPress={pressChar}
+                  disabled={recovering || levelReward != null}
+                />
+              )}
+              {!lite ? (
+                <p className="typing-tip">
+                  {saved.level <= 3
+                    ? 'Match key colors to your fingers · type the lowest rocket first'
+                    : 'Tip: type the lowest rocket first · Esc cancels your current word'}
+                </p>
+              ) : (
+                <p className="typing-tip">
+                  Use your keyboard · Esc cancels the current word
+                </p>
+              )}
             </div>
           ) : null}
         </>

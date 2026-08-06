@@ -17,6 +17,8 @@ type Props = {
   active: boolean
   /** Register the node so the game loop can update `top` without React. */
   registerEl?: (id: string, el: HTMLDivElement | null) => void
+  /** Strip decorative flame/fins for low-power browsers. */
+  lite?: boolean
 }
 
 /** Position (`top`) is also updated imperatively by the game loop — avoid putting
@@ -29,6 +31,7 @@ export function RocketWord({
   rest,
   active,
   registerEl,
+  lite = false,
 }: Props) {
   const nodeRef = useRef<HTMLDivElement>(null)
 
@@ -41,23 +44,27 @@ export function RocketWord({
   return (
     <div
       ref={nodeRef}
-      className={`falling-word ${rocketSkin(id)} ${active ? 'is-active' : ''}`}
+      className={`falling-word ${rocketSkin(id)} ${active ? 'is-active' : ''} ${lite ? 'is-lite' : ''}`}
       style={{ left: `${x}%`, top: `${y}%` }}
     >
-      <div className="rocket-flame" aria-hidden="true">
-        <span />
-        <span />
-        <span />
-      </div>
-      <div className="rocket-fins" aria-hidden="true">
-        <span className="rocket-fin rocket-fin-l" />
-        <span className="rocket-fin rocket-fin-r" />
-      </div>
+      {!lite ? (
+        <div className="rocket-flame" aria-hidden="true">
+          <span />
+          <span />
+          <span />
+        </div>
+      ) : null}
+      {!lite ? (
+        <div className="rocket-fins" aria-hidden="true">
+          <span className="rocket-fin rocket-fin-l" />
+          <span className="rocket-fin rocket-fin-r" />
+        </div>
+      ) : null}
       <div className="rocket-cabin">
         <span className="fw-matched">{matched}</span>
         <span className="fw-rest">{rest}</span>
       </div>
-      <span className="rocket-nose" aria-hidden="true" />
+      {!lite ? <span className="rocket-nose" aria-hidden="true" /> : null}
     </div>
   )
 }

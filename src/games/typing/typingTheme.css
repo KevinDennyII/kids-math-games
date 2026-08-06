@@ -753,7 +753,7 @@
   font-size: clamp(0.9rem, 2.6vw, 1.15rem);
 }
 
-/* During play: drop GPU-heavy effects that tank Chromium on Raspberry Pi. */
+/* During play: drop GPU-heavy effects that tank browsers on Raspberry Pi. */
 .typing-shell.is-playing .typing-sky {
   animation: none;
   opacity: 0.85;
@@ -779,6 +779,113 @@
 
 .typing-shell.is-playing .rocket-nose {
   filter: none;
+}
+
+/* Auto lite mode (Pi / Firefox / low cores): flatten paint cost hard. */
+.typing-shell.is-lite {
+  background: #121c36;
+}
+
+.typing-shell.is-lite .typing-arena {
+  background: #152240;
+  box-shadow: none;
+  border-color: rgb(140 210 255 / 0.35);
+}
+
+.typing-shell.is-lite .typing-ground {
+  background: #3f4f3a;
+}
+
+.typing-shell.is-lite .typing-ground::before {
+  display: none;
+}
+
+.typing-shell.is-lite .typing-stat,
+.typing-shell.is-lite .typing-back,
+.typing-shell.is-lite .typing-reset,
+.typing-shell.is-lite .typing-buddy,
+.typing-shell.is-lite .typing-start,
+.typing-shell.is-lite .typing-reward {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.typing-shell.is-lite .typing-start {
+  background: rgb(8 14 32 / 0.92);
+}
+
+.typing-shell.is-lite .typing-reward {
+  background: rgb(6 12 28 / 0.92);
+  animation: none;
+}
+
+.typing-shell.is-lite .falling-word {
+  animation: none;
+  transition: none;
+}
+
+.typing-shell.is-lite .falling-word.is-lite .rocket-cabin {
+  border-width: 2px;
+  box-shadow: none;
+  border-radius: 8px;
+  padding: 0.35rem 0.7rem;
+}
+
+.typing-shell.is-lite .typing-astro-helmet {
+  box-shadow: none;
+  background: rgb(180 230 255 / 0.15);
+}
+
+.typing-shell.is-lite .typing-astro-helmet::before,
+.typing-shell.is-lite .typing-astro-helmet::after {
+  display: none;
+}
+
+.typing-lite-coach {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  padding: 0.45rem 0.65rem;
+  border-radius: 14px;
+  background: rgb(15 23 36 / 0.92);
+  border: 2px solid rgb(255 255 255 / 0.22);
+}
+
+.typing-lite-coach-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #d7e8ff;
+}
+
+.typing-lite-keys {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.typing-lite-key {
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 2px solid rgb(0 0 0 / 0.35);
+  border-radius: 10px;
+  background: #fbbf24;
+  color: #1c1008;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 3px 0 rgb(0 0 0 / 0.28);
+}
+
+.typing-lite-key:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.typing-lite-key:not(:disabled):active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 rgb(0 0 0 / 0.28);
 }
 
 @media (max-height: 780px) {
