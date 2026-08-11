@@ -181,3 +181,67 @@ export function displayKeyLabel(key: string): string {
   if (key === 'shift-l' || key === 'shift-r') return 'shift'
   return key
 }
+
+/** Shifted punctuation kids often produce while leaning on Shift. */
+const UNSHIFT_PUNCT: Record<string, string> = {
+  '>': '.',
+  '<': ',',
+  ':': ';',
+  '?': '/',
+  '"': "'",
+  '{': '[',
+  '}': ']',
+  _: '-',
+  '+': '=',
+  '~': '`',
+  '|': '\\',
+}
+
+/** Physical key → drill id (ignores Shift / Caps Lock / layout char). */
+const CODE_TO_DRILL_KEY: Record<string, string> = {
+  Comma: ',',
+  Period: '.',
+  Slash: '/',
+  Semicolon: ';',
+  Quote: "'",
+  BracketLeft: '[',
+  BracketRight: ']',
+  Minus: '-',
+  Equal: '=',
+  Backquote: '`',
+  Backslash: '\\',
+  ...Object.fromEntries(
+    Array.from({ length: 26 }, (_, i) => {
+      const letter = String.fromCharCode(97 + i)
+      return [`Key${letter.toUpperCase()}`, letter]
+    }),
+  ),
+  ...Object.fromEntries(
+    Array.from({ length: 10 }, (_, i) => [`Digit${i}`, String(i)]),
+  ),
+}
+
+/** True for single-character keys used in Finger Practice / rockets. */
+export function isDrillKey(key: string): boolean {
+  return key.length === 1 && key in LETTER_FINGER
+}
+
+/**
+ * Normalize a typed / on-screen character into a drill key id.
+ * Accepts letters and punctuation; maps Shift variants (e.g. `>` → `.`).
+ */
+export function normalizeTypedChar(raw: string): string | null {
+  if (raw.length !== 1) return null
+  const unshifted = UNSHIFT_PUNCT[raw] ?? raw.toLowerCase()
+  return isDrillKey(unshifted) ? unshifted : null
+}
+
+/**
+ * Prefer physical `event.code` so period / comma still count when Shift is held
+ * (common on large learning keyboards).
+ */
+export function drillKeyFromKeyboardEvent(event: KeyboardEvent): string | null {
+  const fromCode = CODE_TO_DRILL_KEY[event.code]
+  if (fromCode && isDrillKey(fromCode)) return fromCode
+  return normalizeTypedChar(event.key)
+}

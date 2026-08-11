@@ -13,6 +13,7 @@ import {
 import type { AdaptiveState } from '../../shared/math/types'
 import { useProgressStore } from '../../shared/store/progressStore'
 import { AstroFox } from './AstroFox'
+import { drillKeyFromKeyboardEvent, normalizeTypedChar } from './fingerMap'
 import { TypingFoundation } from './foundation/TypingFoundation'
 import { RocketWord } from './RocketWord'
 import { TypingKeyboard } from './TypingKeyboard'
@@ -271,8 +272,8 @@ export function TypingGame() {
     (raw: string) => {
       if (pausedRef.current || !playingRef.current) return
 
-      const key = raw.toLowerCase()
-      if (!/^[a-z]$/.test(key)) return
+      const key = normalizeTypedChar(raw)
+      if (!key) return
 
       const list = wordsRef.current
       let active = activeRef.current
@@ -357,8 +358,8 @@ export function TypingGame() {
         return
       }
 
-      const key = event.key.length === 1 ? event.key.toLowerCase() : ''
-      if (!/^[a-z]$/.test(key)) return
+      const key = drillKeyFromKeyboardEvent(event)
+      if (!key) return
       event.preventDefault()
       pressChar(key)
     }

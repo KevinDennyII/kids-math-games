@@ -4,6 +4,10 @@ import type { SfxKind } from '../../../shared/audio/musicEngine'
 import { BurstParticles } from '../../../shared/motion/BurstParticles'
 import { useProgressStore } from '../../../shared/store/progressStore'
 import { AstroFox } from '../AstroFox'
+import {
+  drillKeyFromKeyboardEvent,
+  normalizeTypedChar,
+} from '../fingerMap'
 import { FoundationCoach } from './FoundationCoach'
 import {
   FOUNDATION_LESSONS,
@@ -120,8 +124,8 @@ export function TypingFoundation({
       const currentLesson = FOUNDATION_LESSONS[lessonRef.current]
       if (!currentLesson) return
 
-      const key = raw.toLowerCase()
-      if (!/^[a-z]$/.test(key)) return
+      const key = normalizeTypedChar(raw)
+      if (!key) return
 
       const target = promptRef.current
       if (!target) return
@@ -181,8 +185,8 @@ export function TypingFoundation({
 
     const onKey = (event: KeyboardEvent) => {
       if (event.metaKey || event.ctrlKey || event.altKey) return
-      const key = event.key.length === 1 ? event.key.toLowerCase() : ''
-      if (!/^[a-z]$/.test(key)) return
+      const key = drillKeyFromKeyboardEvent(event)
+      if (!key) return
       event.preventDefault()
       pressChar(key)
     }
