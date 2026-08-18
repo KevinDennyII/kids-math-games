@@ -2,8 +2,8 @@
 
 One web app with three browser games for kids:
 
-- **Racecar Math League** (`/race`) — multiplication & simple fractions (~age 8)
-- **Magical Friendship Academy** (`/academy`) — addition with gentle progression (~age 6)
+- **Racecar Math League** (`/race`) — addition, subtraction, multiplication, and division with independent levels (ages 8+)
+- **Magical Friendship Academy** (`/academy`) — the same four operations with gentler independent levels (ages 6+)
 - **Fox Word Rain** (`/typing`) — shared falling-words typing for both kids
 
 Progress saves in the browser via `localStorage`. No accounts. No download required.
@@ -54,7 +54,7 @@ Guided by [Responsive Typography](https://separated-day-526.notion.site/Responsi
 
 - Body text stays `1rem`; headings use fluid `clamp` tokens in `src/styles/tokens.css`
 - Form inputs are `1rem` to avoid iOS Safari focus zoom
-- Shared math loop lives in `useAdaptiveProblemGame` (single source of truth)
+- Shared math loop lives in `useAdaptiveProblemGame`; `OperationPicker` is the shared per-operation level UI
 - Game chrome composed via `GameHeader` + `MathPlayPanel`
 
 ## Stack

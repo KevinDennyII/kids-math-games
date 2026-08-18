@@ -6,9 +6,10 @@ import {
 } from '../../shared/characters/sprites'
 import { GameHeader } from '../../shared/components/GameHeader'
 import { MathPlayPanel } from '../../shared/components/MathPlayPanel'
+import { OperationPicker } from '../../shared/components/OperationPicker'
 import { StreakBar } from '../../shared/components/StreakBar'
 import { useAdaptiveProblemGame } from '../../shared/hooks/useAdaptiveProblemGame'
-import { generateAcademyProblem } from '../../shared/math/generateProblem'
+import { generateAcademyOpProblem } from '../../shared/math/generateProblem'
 import './academyTheme.css'
 
 const ACADEMY_BANNERS = {
@@ -22,7 +23,7 @@ export function AcademyGame() {
   const game = useAdaptiveProblemGame({
     gameId: 'academy',
     musicTheme: 'academy',
-    generateProblem: generateAcademyProblem,
+    generateOpProblem: generateAcademyOpProblem,
     banners: ACADEMY_BANNERS,
   })
 
@@ -44,6 +45,7 @@ export function AcademyGame() {
       />
 
       <StreakBar state={game.state} softTimerSeconds={30} />
+      <OperationPicker gameId="academy" />
 
       <div className="academy-care" aria-hidden="true">
         <div className="academy-friends">

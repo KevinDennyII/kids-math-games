@@ -1,10 +1,26 @@
 export type GameId = 'race' | 'academy' | 'typing'
+export type MathGameId = Extract<GameId, 'race' | 'academy'>
 
 export type ProblemType =
   | 'addition'
+  | 'subtraction'
   | 'multiplication'
+  | 'division'
   | 'fraction'
   | 'word-addition'
+
+export const MATH_OPS = [
+  'addition',
+  'subtraction',
+  'multiplication',
+  'division',
+] as const
+
+/** One independent math track shared by both kids’ games. */
+export type MathOp = (typeof MATH_OPS)[number]
+export type MathOpMode = MathOp | 'mixed'
+export type MathOpLevels = Record<MathOp, number>
+export type MathOpProgress = Record<MathOp, AdaptiveState>
 
 /** Icon used for visual word-addition prompts */
 export type ProblemIcon = 'dog' | 'cat' | 'unicorn' | 'fox'
@@ -43,5 +59,41 @@ export function createAdaptiveState(): AdaptiveState {
     score: 0,
     bestStreak: 0,
     solved: 0,
+  }
+}
+
+export function mathOpFromProblemType(type: ProblemType): MathOp {
+  if (type === 'word-addition') return 'addition'
+  if (
+    type === 'addition' ||
+    type === 'subtraction' ||
+    type === 'multiplication' ||
+    type === 'division'
+  ) {
+    return type
+  }
+  return 'addition'
+}
+
+export function createMathOpProgress(): MathOpProgress {
+  return {
+    addition: createAdaptiveState(),
+    subtraction: createAdaptiveState(),
+    multiplication: createAdaptiveState(),
+    division: createAdaptiveState(),
+  }
+}
+
+export type MathGameProgress = {
+  opMode: MathOpMode
+  ops: MathOpProgress
+  mixed: AdaptiveState
+}
+
+export function createMathGameProgress(opMode: MathOpMode = 'mixed'): MathGameProgress {
+  return {
+    opMode,
+    ops: createMathOpProgress(),
+    mixed: createAdaptiveState(),
   }
 }

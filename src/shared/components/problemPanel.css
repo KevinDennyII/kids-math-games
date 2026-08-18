@@ -35,7 +35,7 @@
 
 .vert-row {
   display: block;
-  min-width: 3.2ch;
+  min-width: 4.5ch;
   text-align: right;
   line-height: 1.05;
 }
@@ -45,7 +45,7 @@
   grid-template-columns: 1fr auto;
   align-items: baseline;
   column-gap: 0.45rem;
-  min-width: 3.2ch;
+  min-width: 4.5ch;
 }
 
 .vert-op {

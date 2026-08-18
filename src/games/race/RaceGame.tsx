@@ -2,9 +2,10 @@ import { CharacterSprite } from '../../shared/characters/CharacterSprite'
 import { SPRITES } from '../../shared/characters/sprites'
 import { GameHeader } from '../../shared/components/GameHeader'
 import { MathPlayPanel } from '../../shared/components/MathPlayPanel'
+import { OperationPicker } from '../../shared/components/OperationPicker'
 import { StreakBar } from '../../shared/components/StreakBar'
 import { useAdaptiveProblemGame } from '../../shared/hooks/useAdaptiveProblemGame'
-import { generateRaceProblem } from '../../shared/math/generateProblem'
+import { generateRaceOpProblem } from '../../shared/math/generateProblem'
 import './raceTheme.css'
 
 const RACE_BANNERS = {
@@ -18,7 +19,7 @@ export function RaceGame() {
   const game = useAdaptiveProblemGame({
     gameId: 'race',
     musicTheme: 'race',
-    generateProblem: generateRaceProblem,
+    generateOpProblem: generateRaceOpProblem,
     banners: RACE_BANNERS,
   })
 
@@ -41,6 +42,7 @@ export function RaceGame() {
       />
 
       <StreakBar state={game.state} softTimerSeconds={15} />
+      <OperationPicker gameId="race" />
 
       <div className="race-stage" aria-hidden="true">
         <div className="race-buddy-cheer">
@@ -106,7 +108,7 @@ export function RaceGame() {
         popPoints={game.popPoints}
         popKey={game.popKey}
         showScratchPad={
-          game.problem.layout === 'vertical' || game.problem.type === 'fraction'
+          game.problem.type === 'addition' || game.problem.layout === 'vertical'
         }
       />
     </main>

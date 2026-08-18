@@ -1,0 +1,63 @@
+.op-picker {
+  width: min(100%, 580px);
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.45rem;
+}
+
+.op-picker-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.1rem;
+  min-height: var(--touch-min);
+  padding: 0.35rem 0.25rem;
+  border: 3px solid rgb(255 255 255 / 0.55);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--panel, #fff) 88%, transparent);
+  color: var(--ink, #1a1a1a);
+  font-family: var(--font-display);
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 3px 0 color-mix(in srgb, var(--ink, #1a1a1a) 12%, transparent);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.op-picker-btn:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--accent, #888) 55%, white);
+  outline-offset: 2px;
+}
+
+.op-picker-symbol {
+  font-size: var(--text-xl);
+  line-height: 1;
+}
+
+.op-picker-label {
+  font-size: var(--text-xs);
+  letter-spacing: 0.02em;
+  text-align: center;
+  line-height: 1.15;
+}
+
+.op-picker-level {
+  font-size: 0.65rem;
+  font-weight: 800;
+  opacity: 0.75;
+}
+
+.op-picker-btn.is-selected {
+  background: var(--accent, #f39c12);
+  border-color: color-mix(in srgb, var(--accent, #f39c12) 35%, white);
+  color: var(--ink, #1a1a1a);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent, #f39c12) 45%, transparent);
+}
+
+@media (max-width: 560px) {
+  .op-picker {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

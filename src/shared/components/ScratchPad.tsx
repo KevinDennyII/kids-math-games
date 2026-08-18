@@ -8,7 +8,7 @@ type Props = {
 }
 
 /**
- * Finger/stylus-friendly work area for bigger multiplication & fractions.
+ * Finger/stylus-friendly work area for bigger two-digit problems.
  */
 export function ScratchPad({ resetKey, disabled }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null)

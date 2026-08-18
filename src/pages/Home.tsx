@@ -104,9 +104,9 @@ export function Home() {
             <div className="cta-art" aria-hidden="true">
               <CharacterSprite src={SPRITES.car} alt="" size="lg" motion="drive" />
             </div>
-            <span className="cta-kicker">For him · Ages ~8</span>
+            <span className="cta-kicker">For him · AGES 8+</span>
             <span className="cta-title">Racecar Math League</span>
-            <span className="cta-copy">Multiply, fuel up, collect badges</span>
+            <span className="cta-copy">Add, subtract, multiply, divide — pick your mix</span>
           </Link>
           <Link className="home-cta academy-cta" to="/academy">
             <div className="cta-art cta-art-pets" aria-hidden="true">
@@ -114,9 +114,9 @@ export function Home() {
               <CharacterSprite src={SPRITES.cat} alt="" size="sm" motion="sway" />
               <CharacterSprite src={SPRITES.unicorn} alt="" size="sm" motion="hop" />
             </div>
-            <span className="cta-kicker">For her · Ages ~6</span>
+            <span className="cta-kicker">For her · AGES 6+</span>
             <span className="cta-title">Magical Friendship Academy</span>
-            <span className="cta-copy">Add, care for pets, earn stickers</span>
+            <span className="cta-copy">Add, subtract, multiply, divide — care for pets</span>
           </Link>
           <Link className="home-cta typing-cta" to="/typing">
             <div className="cta-art cta-art-keyboard" aria-hidden="true">
