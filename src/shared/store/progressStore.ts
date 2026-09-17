@@ -21,8 +21,6 @@ import {
 import { CLOCK_MAX_LEVEL } from '../../games/clock/timeTypes'
 
 export type ProgressStore = {
-  race: AdaptiveState
-  academy: AdaptiveState
   clock: AdaptiveState
   math: Record<MathGameId, MathGameProgress>
   typing: AdaptiveState
@@ -39,15 +37,6 @@ export type ProgressStore = {
   resetGame: (game: GameId) => void
 }
 
-export function selectMathDisplayState(
-  store: ProgressStore,
-  game: MathGameId,
-): AdaptiveState {
-  const progress = store.math[game]
-  if (progress.opMode === 'mixed') return progress.mixed
-  return progress.ops[progress.opMode]
-}
-
 function mergeOps(persisted: Partial<MathOpProgress> | undefined): MathOpProgress {
   const base = createMathOpProgress()
   if (!persisted) return base
@@ -59,20 +48,32 @@ function mergeOps(persisted: Partial<MathOpProgress> | undefined): MathOpProgres
   }
 }
 
+/** Older saves stored race/academy AdaptiveState + flat raceOps fields. */
 type LegacyMathPersist = Partial<ProgressStore> & {
+  race?: AdaptiveState
+  academy?: AdaptiveState
   raceOpMode?: MathOpMode
   raceOps?: Partial<MathOpProgress>
   raceMixed?: AdaptiveState
+  math?: Partial<Record<MathGameId, Partial<MathGameProgress>>>
 }
 
-function mergeMath(persisted: LegacyMathPersist, current: ProgressStore['math']) {
+function mergeMath(
+  persisted: LegacyMathPersist,
+  current: ProgressStore['math'],
+): ProgressStore['math'] {
   const raceLegacyOps = persisted.raceOps ?? persisted.math?.race?.ops
   return {
     race: {
-      opMode: persisted.math?.race?.opMode ?? persisted.raceOpMode ?? current.race.opMode,
+      opMode:
+        persisted.math?.race?.opMode ??
+        persisted.raceOpMode ??
+        current.race.opMode,
       ops: mergeOps(raceLegacyOps),
       mixed:
-        persisted.math?.race?.mixed ?? persisted.raceMixed ?? current.race.mixed,
+        persisted.math?.race?.mixed ??
+        persisted.raceMixed ??
+        current.race.mixed,
     },
     academy: {
       opMode: persisted.math?.academy?.opMode ?? current.academy.opMode,
@@ -91,8 +92,6 @@ function mergeMath(persisted: LegacyMathPersist, current: ProgressStore['math'])
 export const useProgressStore = create<ProgressStore>()(
   persist(
     (set, get) => ({
-      race: createAdaptiveState(),
-      academy: createAdaptiveState(),
       clock: createAdaptiveState(),
       math: {
         race: createMathGameProgress('mixed'),
@@ -121,10 +120,7 @@ export const useProgressStore = create<ProgressStore>()(
             }
           }
 
-          set({
-            math: { ...get().math, [game]: nextProgress },
-            [game]: opResult.state,
-          })
+          set({ math: { ...get().math, [game]: nextProgress } })
           return opResult
         }
 
@@ -132,9 +128,9 @@ export const useProgressStore = create<ProgressStore>()(
           return get().recordClockAnswer(correct)
         }
 
-        const prev = get()[game]
+        const prev = get().typing
         const result = applyAnswer(prev, correct)
-        set({ [game]: result.state })
+        set({ typing: result.state })
         return result
       },
       recordClockAnswer: (correct) => {
@@ -166,7 +162,6 @@ export const useProgressStore = create<ProgressStore>()(
         if (game === 'race' || game === 'academy') {
           const opMode = game === 'academy' ? 'addition' : 'mixed'
           set({
-            [game]: createAdaptiveState(),
             math: {
               ...get().math,
               [game]: createMathGameProgress(opMode),
@@ -174,7 +169,7 @@ export const useProgressStore = create<ProgressStore>()(
           })
           return
         }
-        set({ [game]: createAdaptiveState() })
+        set({ clock: createAdaptiveState() })
       },
     }),
     {
@@ -183,9 +178,6 @@ export const useProgressStore = create<ProgressStore>()(
         const p = (persisted ?? {}) as LegacyMathPersist
         return {
           ...current,
-          ...p,
-          race: p.race ?? current.race,
-          academy: p.academy ?? current.academy,
           clock: p.clock ?? current.clock,
           math: mergeMath(p, current.math),
           typing: p.typing ?? current.typing,

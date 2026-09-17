@@ -7,18 +7,13 @@ const V = 'v2'
 
 export const SPRITES = {
   car: `/characters/car-red.png?${V}`,
-  carGreen: `/characters/car-green.png?${V}`,
-  truck: `/characters/truck-blue.png?${V}`,
   badgeLightning: `/characters/badge-lightning.png?${V}`,
   badgeFlame: `/characters/badge-flame.png?${V}`,
-  badgeStar: `/characters/badge-star.png?${V}`,
   fox: `/characters/fox.png?${V}`,
   dog: `/characters/dog.png?${V}`,
   cat: `/characters/cat.png?${V}`,
   unicorn: `/characters/unicorn.png?${V}`,
-  turtle: `/characters/turtle.png?${V}`,
   bunny: `/characters/bunny.png?${V}`,
-  penguin: `/characters/penguin.png?${V}`,
 } as const
 
 export type SpriteId = keyof typeof SPRITES

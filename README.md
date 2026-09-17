@@ -3,9 +3,9 @@
 One web app with four browser games for kids:
 
 - **Racecar Math League** (`/race`) — addition, subtraction, multiplication, and division with independent levels (ages 8+)
-- **Magical Friendship Academy** (`/academy`) — the same four operations with gentler independent levels (ages 6+)
+- **Magical Math Academy** (`/academy`) — the same four operations with gentler independent levels (ages 6+)
 - **It’s TIME!** (`/clock`) — analog clock reading & setting that blends race + pet themes (both kids). Optional hands-on tutorial, then scaffolds o’clock → half past → quarters → count-by-5s with read and set modes.
-- **Fox Word Rain** (`/typing`) — shared falling-words typing for both kids
+- **Fox Rockets** (`/typing`) — shared falling-words typing for both kids
 
 Progress saves in the browser via `localStorage`. No accounts. No download required.
 

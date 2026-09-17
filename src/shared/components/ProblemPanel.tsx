@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { SPRITES } from '../characters/sprites'
 import type { Problem, ProblemIcon } from '../math/types'
+import { PROBLEM_ICON_LABELS } from '../math/types'
 import './problemPanel.css'
 
 type Props = {
@@ -83,14 +84,7 @@ function VisualPrompt({ problem }: { problem: Problem }) {
     return <p className="problem-prompt">{problem.prompt}</p>
   }
 
-  const label =
-    icon === 'dog'
-      ? 'puppies'
-      : icon === 'cat'
-        ? 'kitties'
-        : icon === 'unicorn'
-          ? 'unicorns'
-          : 'fox friends'
+  const label = PROBLEM_ICON_LABELS[icon]
 
   return (
     <div className="problem-prompt problem-prompt-visual" aria-label={problem.prompt}>

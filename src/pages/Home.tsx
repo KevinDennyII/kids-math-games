@@ -124,7 +124,7 @@ export function Home() {
               <CharacterSprite src={SPRITES.unicorn} alt="" size="sm" motion="hop" />
             </div>
             <span className="cta-kicker">For her · AGES 6+</span>
-            <span className="cta-title">Magical Friendship Academy</span>
+            <span className="cta-title">Magical Math Academy</span>
             <span className="cta-copy">Add, subtract, multiply, divide — care for pets</span>
           </Link>
           <Link className="home-cta clock-cta" to="/clock">

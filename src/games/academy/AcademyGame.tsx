@@ -14,7 +14,7 @@ import './academyTheme.css'
 
 const ACADEMY_BANNERS = {
   correct: 'Your pets are so happy!',
-  leveledUp: 'New friendship magic unlocked!',
+  leveledUp: 'New math magic unlocked!',
   wrong: 'Nice try! A little hint will help.',
   leveledDown: 'Soft landing — let’s try easier flowers.',
 } as const
@@ -38,7 +38,7 @@ export function AcademyGame() {
       <div className="academy-sparkles" aria-hidden="true" />
       <GameHeader
         classPrefix="academy"
-        title="Magical Friendship Academy"
+        title="Magical Math Academy"
         muted={game.muted}
         onToggleMute={() => game.setMuted(!game.muted)}
         onReset={game.reset}
@@ -75,9 +75,8 @@ export function AcademyGame() {
         </div>
 
         <div className="academy-pet-row">
-          {ACADEMY_PETS.map((pet) => {
-            const unlocked =
-              game.state.level >= ACADEMY_PETS.findIndex((p) => p.id === pet.id) + 1
+          {ACADEMY_PETS.map((pet, index) => {
+            const unlocked = game.state.level >= index + 1
             const active = pet.id === activePet.id
             return (
               <div

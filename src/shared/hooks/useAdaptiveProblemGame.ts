@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { MusicTheme } from '../audio/musicEngine'
 import { useGameMusic } from '../audio/useGameMusic'
-import { pickMixedOp } from '../math/generateProblem'
+import { generateMathProblem } from '../math/generateProblem'
 import type { MathGameId, MathOp, Problem } from '../math/types'
 import { useProgressStore } from '../store/progressStore'
 
@@ -33,7 +33,6 @@ export function useAdaptiveProblemGame({
   banners,
 }: Options) {
   const opMode = useProgressStore((s) => s.math[gameId].opMode)
-  const ops = useProgressStore((s) => s.math[gameId].ops)
   const state = useProgressStore((s) => {
     const progress = s.math[gameId]
     return progress.opMode === 'mixed'
@@ -46,8 +45,13 @@ export function useAdaptiveProblemGame({
 
   const makeProblem = useCallback(() => {
     const progress = useProgressStore.getState().math[gameId]
-    const op = progress.opMode === 'mixed' ? pickMixedOp() : progress.opMode
-    return generateOpProblem(op, progress.ops[op].level)
+    const opLevels = {
+      addition: progress.ops.addition.level,
+      subtraction: progress.ops.subtraction.level,
+      multiplication: progress.ops.multiplication.level,
+      division: progress.ops.division.level,
+    }
+    return generateMathProblem(generateOpProblem, progress.opMode, opLevels)
   }, [gameId, generateOpProblem])
 
   const [problem, setProblem] = useState<Problem>(() => makeProblem())
@@ -144,8 +148,6 @@ export function useAdaptiveProblemGame({
 
   return {
     state,
-    opMode,
-    ops,
     muted,
     setMuted,
     problem,

@@ -6,7 +6,6 @@ export type ProblemType =
   | 'subtraction'
   | 'multiplication'
   | 'division'
-  | 'fraction'
   | 'word-addition'
 
 export const MATH_OPS = [
@@ -24,6 +23,13 @@ export type MathOpProgress = Record<MathOp, AdaptiveState>
 
 /** Icon used for visual word-addition prompts */
 export type ProblemIcon = 'dog' | 'cat' | 'unicorn' | 'fox'
+
+export const PROBLEM_ICON_LABELS: Record<ProblemIcon, string> = {
+  dog: 'puppies',
+  cat: 'kitties',
+  unicorn: 'unicorns',
+  fox: 'fox friends',
+}
 
 export interface Problem {
   id: string
@@ -64,12 +70,7 @@ export function createAdaptiveState(): AdaptiveState {
 
 export function mathOpFromProblemType(type: ProblemType): MathOp {
   if (type === 'word-addition') return 'addition'
-  if (
-    type === 'addition' ||
-    type === 'subtraction' ||
-    type === 'multiplication' ||
-    type === 'division'
-  ) {
+  if (type === 'addition' || type === 'subtraction' || type === 'multiplication' || type === 'division') {
     return type
   }
   return 'addition'

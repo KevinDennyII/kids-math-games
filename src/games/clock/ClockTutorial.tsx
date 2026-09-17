@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { musicEngine } from '../../shared/audio/musicEngine'
 import { AnalogClock } from './AnalogClock'
 import { formatDigital, isSetCorrect } from './generateTimeProblem'
@@ -147,16 +147,10 @@ export function ClockTutorial({ onFinished, onSkip }: Props) {
   const [minutes, setMinutes] = useState(STEPS[0]!.minutes)
   const [feedback, setFeedback] = useState<'idle' | 'correct' | 'wrong'>('idle')
   const [hint, setHint] = useState<string | null>(null)
+  const [readChoices, setReadChoices] = useState<string[]>([])
 
   const step = STEPS[stepIndex]!
   const progressPct = ((stepIndex + 1) / STEPS.length) * 100
-
-  const readChoices = useMemo(() => {
-    if (!step.tryRead) return []
-    return shuffleChoices(step.tryRead.choices)
-    // Re-shuffle when the step changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [step.id])
 
   const goToStep = (index: number) => {
     const next = STEPS[index]!
@@ -165,6 +159,7 @@ export function ClockTutorial({ onFinished, onSkip }: Props) {
     setMinutes(next.minutes)
     setFeedback('idle')
     setHint(null)
+    setReadChoices(next.tryRead ? shuffleChoices(next.tryRead.choices) : [])
   }
 
   const needsPractice = Boolean(step.trySet || step.tryRead)

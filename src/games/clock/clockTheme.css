@@ -50,39 +50,6 @@
   }
 }
 
-.clock-top {
-  width: min(100%, 720px);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  z-index: 1;
-}
-
-.clock-title {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: clamp(1.2rem, 4vw, 1.7rem);
-  text-align: center;
-}
-
-.clock-back,
-.clock-reset {
-  border: none;
-  background: rgb(255 255 255 / 0.78);
-  border-radius: 999px;
-  padding: 0.45rem 0.85rem;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.clock-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  flex-shrink: 0;
-}
-
 .clock-skill-chip {
   z-index: 1;
   display: flex;

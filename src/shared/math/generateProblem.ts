@@ -1,4 +1,11 @@
-import type { MathOp, MathOpLevels, MathOpMode, Problem } from './types'
+import type {
+  MathOp,
+  MathOpLevels,
+  MathOpMode,
+  Problem,
+  ProblemIcon,
+} from './types'
+import { MATH_OPS, PROBLEM_ICON_LABELS } from './types'
 
 function randomInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min
@@ -12,15 +19,8 @@ function clampLevel(level: number): number {
   return Math.min(3, Math.max(1, level))
 }
 
-const MIXED_OPS: MathOp[] = [
-  'addition',
-  'subtraction',
-  'multiplication',
-  'division',
-]
-
 export function pickMixedOp(): MathOp {
-  return MIXED_OPS[randomInt(0, MIXED_OPS.length - 1)]!
+  return MATH_OPS[randomInt(0, MATH_OPS.length - 1)]!
 }
 
 export function generateMathProblem(
@@ -199,21 +199,17 @@ function generateAcademyAddition(level: number): Problem {
     }
   }
 
-  const themes = [
-    { icon: 'dog' as const, label: 'puppies' },
-    { icon: 'cat' as const, label: 'kitties' },
-    { icon: 'unicorn' as const, label: 'unicorns' },
-    { icon: 'fox' as const, label: 'fox friends' },
-  ]
-  const theme = themes[randomInt(0, themes.length - 1)]!
+  const icons = Object.keys(PROBLEM_ICON_LABELS) as ProblemIcon[]
+  const icon = icons[randomInt(0, icons.length - 1)]!
+  const label = PROBLEM_ICON_LABELS[icon]
   return {
     id: uid(),
     type: 'word-addition',
-    prompt: `${a} ${theme.label} + ${b} ${theme.label}`,
+    prompt: `${a} ${label} + ${b} ${label}`,
     answer: a + b,
     hint: `Count all the pictures together: ${a} and ${b}.`,
     operands: [a, b],
-    visualIcon: theme.icon,
+    visualIcon: icon,
   }
 }
 

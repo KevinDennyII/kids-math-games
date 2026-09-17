@@ -29,39 +29,6 @@
   pointer-events: none;
 }
 
-.race-top {
-  width: min(100%, 720px);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  z-index: 1;
-}
-
-.race-title {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: clamp(1.2rem, 4vw, 1.7rem);
-  text-align: center;
-}
-
-.race-back,
-.race-reset {
-  border: none;
-  background: rgb(255 255 255 / 0.75);
-  border-radius: 999px;
-  padding: 0.45rem 0.85rem;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.race-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  flex-shrink: 0;
-}
-
 .race-stage {
   width: min(100%, 640px);
   z-index: 1;

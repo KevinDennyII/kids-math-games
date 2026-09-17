@@ -30,37 +30,8 @@
   opacity: 0.7;
 }
 
-.academy-top {
-  width: min(100%, 720px);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  z-index: 1;
-}
-
 .academy-title {
-  margin: 0;
-  font-family: var(--font-display);
   font-size: clamp(1.05rem, 3.6vw, 1.55rem);
-  text-align: center;
-}
-
-.academy-back,
-.academy-reset {
-  border: none;
-  background: rgb(255 255 255 / 0.8);
-  border-radius: 999px;
-  padding: 0.45rem 0.85rem;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.academy-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  flex-shrink: 0;
 }
 
 .academy-care {
