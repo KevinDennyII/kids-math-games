@@ -99,14 +99,25 @@
 }
 
 .cta-art {
-  align-self: center;
-  margin-bottom: 0.25rem;
+  align-self: stretch;
+  flex: 1 1 auto;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-height: 4.5rem;
+  margin-bottom: 0.15rem;
 }
 
 .cta-art-pets {
   display: flex;
   align-items: flex-end;
+  justify-content: center;
   gap: 0.15rem;
+}
+
+.race-cta,
+.academy-cta {
+  min-height: 200px;
 }
 
 .cta-art-clock {
