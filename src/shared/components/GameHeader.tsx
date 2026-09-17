@@ -7,7 +7,7 @@ type Props = {
   muted: boolean
   onToggleMute: () => void
   onReset: () => void
-  classPrefix: 'race' | 'academy' | 'typing'
+  classPrefix: 'race' | 'academy' | 'typing' | 'clock'
 }
 
 /** Shared game chrome — home link, title, music, reset (composition over duplication). */

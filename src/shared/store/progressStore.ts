@@ -18,10 +18,12 @@ import {
   createTypingFoundationState,
   type TypingFoundationState,
 } from '../../games/typing/foundation/lessonBank'
+import { CLOCK_MAX_LEVEL } from '../../games/clock/timeTypes'
 
 export type ProgressStore = {
   race: AdaptiveState
   academy: AdaptiveState
+  clock: AdaptiveState
   math: Record<MathGameId, MathGameProgress>
   typing: AdaptiveState
   typingFoundation: TypingFoundationState
@@ -30,6 +32,7 @@ export type ProgressStore = {
     correct: boolean,
     problemType?: ProblemType,
   ) => ReturnType<typeof applyAnswer>
+  recordClockAnswer: (correct: boolean) => ReturnType<typeof applyAnswer>
   setOpMode: (game: MathGameId, mode: MathOpMode) => void
   setTyping: (state: AdaptiveState) => void
   setTypingFoundation: (state: TypingFoundationState) => void
@@ -90,6 +93,7 @@ export const useProgressStore = create<ProgressStore>()(
     (set, get) => ({
       race: createAdaptiveState(),
       academy: createAdaptiveState(),
+      clock: createAdaptiveState(),
       math: {
         race: createMathGameProgress('mixed'),
         academy: createMathGameProgress('addition'),
@@ -124,9 +128,22 @@ export const useProgressStore = create<ProgressStore>()(
           return opResult
         }
 
+        if (game === 'clock') {
+          return get().recordClockAnswer(correct)
+        }
+
         const prev = get()[game]
         const result = applyAnswer(prev, correct)
         set({ [game]: result.state })
+        return result
+      },
+      recordClockAnswer: (correct) => {
+        const prev = get().clock
+        const result = applyAnswer(prev, correct, {
+          maxLevel: CLOCK_MAX_LEVEL,
+          correctPerLevel: 3,
+        })
+        set({ clock: result.state })
         return result
       },
       setOpMode: (game, mode) => {
@@ -169,6 +186,7 @@ export const useProgressStore = create<ProgressStore>()(
           ...p,
           race: p.race ?? current.race,
           academy: p.academy ?? current.academy,
+          clock: p.clock ?? current.clock,
           math: mergeMath(p, current.math),
           typing: p.typing ?? current.typing,
           typingFoundation: p.typingFoundation ?? current.typingFoundation,

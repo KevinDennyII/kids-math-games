@@ -1,5 +1,5 @@
-export type MusicTheme = 'race' | 'academy' | 'typing'
-export type SfxKind = 'correct' | 'wrong'
+export type MusicTheme = 'race' | 'academy' | 'typing' | 'clock'
+export type SfxKind = 'correct' | 'wrong' | 'ding'
 
 type ThemeConfig = {
   bpm: number
@@ -60,6 +60,22 @@ const THEMES: Record<MusicTheme, ThemeConfig> = {
     bass: [
       220.0, null, 246.94, null, 261.63, null, 246.94, null,
       220.0, null, 196.0, null, 220.0, null, 246.94, null,
+    ],
+  },
+  clock: {
+    bpm: 108,
+    wave: 'triangle',
+    bassWave: 'sine',
+    melodyGain: 0.046,
+    bassGain: 0.024,
+    // Peppy race energy + soft academy intervals
+    melody: [
+      523.25, 587.33, 659.25, 587.33, 523.25, 440.0, 392.0, null,
+      440.0, 523.25, 587.33, 698.46, 587.33, 523.25, 440.0, 392.0,
+    ],
+    bass: [
+      130.81, null, 146.83, null, 164.81, null, 174.61, null,
+      196.0, null, 174.61, null, 164.81, null, 146.83, null,
     ],
   },
 }
@@ -163,6 +179,13 @@ class MusicEngine {
   async playSfx(kind: SfxKind) {
     await this.unlock()
     if (!this.ctx || !this.master || this.muted) return
+    if (kind === 'ding') {
+      // Bright bell-like ding for clock rewards
+      this.beep(987.77, 'sine', 0.1, 0.12)
+      window.setTimeout(() => this.beep(1318.51, 'triangle', 0.09, 0.28), 70)
+      window.setTimeout(() => this.beep(1567.98, 'sine', 0.05, 0.35), 140)
+      return
+    }
     if (kind === 'correct') {
       this.beep(523.25, 'triangle', 0.08, 0.12)
       window.setTimeout(() => this.beep(659.25, 'triangle', 0.08, 0.12), 90)

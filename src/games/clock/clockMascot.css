@@ -1,0 +1,101 @@
+.clock-mascot {
+  display: block;
+  filter: drop-shadow(0 8px 0 rgb(0 0 0 / 0.12));
+}
+
+.clock-mascot-body {
+  transform-origin: 80px 82px;
+  animation: clockMascotBob 2.4s ease-in-out infinite;
+}
+
+.clock-mascot-shadow {
+  transform-origin: 80px 148px;
+  animation: clockMascotShadow 2.4s ease-in-out infinite;
+}
+
+.clock-mascot-hour,
+.clock-mascot-minute {
+  transform-box: view-box;
+  transform-origin: 80px 82px;
+}
+
+.clock-mascot-hour {
+  animation: clockMascotHour 8s linear infinite;
+}
+
+.clock-mascot-minute {
+  animation: clockMascotMinute 2s linear infinite;
+}
+
+.clock-mascot-num {
+  font-family: var(--font-display), Fredoka, Nunito, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  fill: #4a3040;
+}
+
+.clock-hero-mascot {
+  width: min(140px, 36vw);
+  height: auto;
+}
+
+@keyframes clockMascotBob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes clockMascotShadow {
+  0%,
+  100% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scaleX(0.82);
+    opacity: 0.65;
+  }
+}
+
+@keyframes clockMascotHour {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes clockMascotMinute {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes clockMascotPop {
+  from {
+    transform: scale(0.92) rotate(-4deg);
+  }
+  50% {
+    transform: scale(1.08) rotate(3deg);
+  }
+  to {
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .clock-mascot-body,
+  .clock-mascot-shadow,
+  .clock-mascot-hour,
+  .clock-mascot-minute {
+    animation: none;
+  }
+}

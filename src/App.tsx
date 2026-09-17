@@ -3,6 +3,7 @@ import { Home } from './pages/Home'
 import { RaceGame } from './games/race/RaceGame'
 import { AcademyGame } from './games/academy/AcademyGame'
 import { TypingGame } from './games/typing/TypingGame'
+import { ClockGame } from './games/clock/ClockGame'
 
 export default function App() {
   return (
@@ -11,6 +12,7 @@ export default function App() {
         <Route path="/" element={<Home />} />
         <Route path="/race" element={<RaceGame />} />
         <Route path="/academy" element={<AcademyGame />} />
+        <Route path="/clock" element={<ClockGame />} />
         <Route path="/typing" element={<TypingGame />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

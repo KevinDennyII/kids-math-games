@@ -1,4 +1,4 @@
-export type GameId = 'race' | 'academy' | 'typing'
+export type GameId = 'race' | 'academy' | 'typing' | 'clock'
 export type MathGameId = Extract<GameId, 'race' | 'academy'>
 
 export type ProblemType =

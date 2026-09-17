@@ -1,0 +1,72 @@
+.analog-clock {
+  width: min(100%, 280px);
+  height: auto;
+  display: block;
+  filter: drop-shadow(0 10px 18px rgb(40 20 40 / 0.22));
+  touch-action: none;
+  user-select: none;
+}
+
+.analog-clock.is-interactive {
+  cursor: grab;
+}
+
+.analog-clock.is-interactive:active {
+  cursor: grabbing;
+}
+
+.analog-clock-numeral {
+  font-family: var(--font-display), Fredoka, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  fill: #3a2a38;
+  paint-order: stroke fill;
+  stroke: rgb(255 250 243 / 0.9);
+  stroke-width: 3px;
+}
+
+.analog-clock-minutes {
+  font-family: var(--font-display), Fredoka, sans-serif;
+  font-size: 8.5px;
+  font-weight: 700;
+  fill: #e67e22;
+  paint-order: stroke fill;
+  stroke: rgb(255 252 245 / 0.95);
+  stroke-width: 2.5px;
+  letter-spacing: -0.02em;
+}
+
+.analog-hand-hour.is-emphasis line:last-child {
+  stroke: #ff4f9a;
+  filter: drop-shadow(0 0 4px rgb(255 111 171 / 0.7));
+}
+
+.analog-hand-minute.is-emphasis line:last-child {
+  stroke: #ffb020;
+  filter: drop-shadow(0 0 4px rgb(243 156 18 / 0.75));
+}
+
+.analog-clock.is-celebrate {
+  animation: clockCheer 560ms var(--spring-snappy, ease-out);
+}
+
+@keyframes clockCheer {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.06) rotate(-2deg);
+  }
+  70% {
+    transform: scale(1.03) rotate(2deg);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .analog-clock.is-celebrate {
+    animation: none;
+  }
+}

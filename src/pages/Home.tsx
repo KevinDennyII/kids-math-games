@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { CharacterSprite } from '../shared/characters/CharacterSprite'
 import { SPRITES } from '../shared/characters/sprites'
+import { ClockMascot } from '../games/clock/ClockMascot'
 import './home.css'
 
 function ColorfulKeyboard() {
@@ -90,8 +91,8 @@ export function Home() {
         <p className="home-brand">Kids Math Games</p>
         <h1 className="home-headline">Pick your adventure</h1>
         <p className="home-sub">
-          Math worlds for each kid — plus a shared space typing game they can
-          both play.
+          Math worlds for each kid — a shared clock adventure that mixes both
+          themes — plus a space typing game they can both play.
         </p>
 
         <div className="home-fox-banner" aria-hidden="true">
@@ -100,6 +101,14 @@ export function Home() {
         </div>
 
         <div className="home-actions">
+          <Link className="home-cta typing-cta" to="/typing">
+            <div className="cta-art cta-art-keyboard" aria-hidden="true">
+              <ColorfulKeyboard />
+            </div>
+            <span className="cta-kicker">Both kids · Typing</span>
+            <span className="cta-title">Fox Rockets</span>
+            <span className="cta-copy">Type word rockets before they land</span>
+          </Link>
           <Link className="home-cta race-cta" to="/race">
             <div className="cta-art" aria-hidden="true">
               <CharacterSprite src={SPRITES.car} alt="" size="lg" motion="drive" />
@@ -118,13 +127,15 @@ export function Home() {
             <span className="cta-title">Magical Friendship Academy</span>
             <span className="cta-copy">Add, subtract, multiply, divide — care for pets</span>
           </Link>
-          <Link className="home-cta typing-cta" to="/typing">
-            <div className="cta-art cta-art-keyboard" aria-hidden="true">
-              <ColorfulKeyboard />
+          <Link className="home-cta clock-cta" to="/clock">
+            <div className="cta-art cta-art-clock" aria-hidden="true">
+              <ClockMascot />
             </div>
-            <span className="cta-kicker">Both kids · Typing</span>
-            <span className="cta-title">Fox Rockets</span>
-            <span className="cta-copy">Type word rockets before they land</span>
+            <span className="cta-kicker">Both kids · Tell time</span>
+            <span className="cta-title">It’s TIME!</span>
+            <span className="cta-copy">
+              Race + pet magic — read and set the track clock
+            </span>
           </Link>
         </div>
       </div>
