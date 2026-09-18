@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { applyAnswer } from './adaptive'
+import { applyAnswer, MATH_ADAPTIVE } from './adaptive'
 import { createAdaptiveState } from './types'
 import { generateAcademyOpProblem, generateMathProblem, generateRaceOpProblem } from './generateProblem'
 import type { MathOpLevels } from './types'
@@ -46,6 +46,84 @@ describe('adaptive difficulty', () => {
     expect(leveled.leveledUp).toBe(true)
     expect(leveled.state.level).toBe(2)
     expect(leveled.pointsEarned).toBeGreaterThanOrEqual(50)
+  })
+
+  it('math categories level up at 80% accuracy after 5 attempts', () => {
+    let state = createAdaptiveState()
+
+    for (let i = 0; i < 3; i++) {
+      state = applyAnswer(state, true, MATH_ADAPTIVE).state
+    }
+    state = applyAnswer(state, false, MATH_ADAPTIVE).state
+    expect(state.level).toBe(1)
+    expect(state.levelAttempts).toBe(4)
+    expect(state.levelCorrect).toBe(3)
+
+    // 4/5 = 80% → level up
+    const leveled = applyAnswer(state, true, MATH_ADAPTIVE)
+    expect(leveled.leveledUp).toBe(true)
+    expect(leveled.state.level).toBe(2)
+    expect(leveled.state.levelAttempts).toBe(0)
+    expect(leveled.state.levelCorrect).toBe(0)
+  })
+
+  it('math categories stay put when accuracy is under 80%', () => {
+    let state = createAdaptiveState()
+
+    for (let i = 0; i < 3; i++) {
+      state = applyAnswer(state, true, MATH_ADAPTIVE).state
+    }
+    state = applyAnswer(state, false, MATH_ADAPTIVE).state
+    const result = applyAnswer(state, false, MATH_ADAPTIVE)
+
+    expect(result.leveledUp).toBe(false)
+    expect(result.state.level).toBe(1)
+    expect(result.state.levelAttempts).toBe(5)
+    expect(result.state.levelCorrect).toBe(3)
+  })
+
+  it('math categories keep accumulating until 80% is reached', () => {
+    let state = createAdaptiveState()
+
+    for (let i = 0; i < 3; i++) {
+      state = applyAnswer(state, true, MATH_ADAPTIVE).state
+    }
+    state = applyAnswer(state, false, MATH_ADAPTIVE).state
+    // Isolate the second miss so wrong-streak level-down does not fire at L1
+    state = applyAnswer(
+      { ...state, wrongStreak: 0 },
+      false,
+      MATH_ADAPTIVE,
+    ).state
+    expect(state.level).toBe(1)
+    expect(state.levelCorrect / state.levelAttempts).toBe(0.6)
+
+    for (let i = 0; i < 3; i++) {
+      state = applyAnswer(state, true, MATH_ADAPTIVE).state
+    }
+    expect(state.level).toBe(1)
+    expect(state.levelCorrect).toBe(6)
+    expect(state.levelAttempts).toBe(8)
+
+    state = applyAnswer(state, true, MATH_ADAPTIVE).state
+    const leveled = applyAnswer(state, true, MATH_ADAPTIVE)
+    expect(leveled.leveledUp).toBe(true)
+    expect(leveled.state.level).toBe(2)
+  })
+
+  it('math categories reset accuracy counters when leveling down', () => {
+    let state = {
+      ...createAdaptiveState(),
+      level: 2,
+      levelAttempts: 4,
+      levelCorrect: 2,
+    }
+    state = applyAnswer(state, false, MATH_ADAPTIVE).state
+    const dropped = applyAnswer(state, false, MATH_ADAPTIVE)
+    expect(dropped.leveledDown).toBe(true)
+    expect(dropped.state.level).toBe(1)
+    expect(dropped.state.levelAttempts).toBe(0)
+    expect(dropped.state.levelCorrect).toBe(0)
   })
 })
 

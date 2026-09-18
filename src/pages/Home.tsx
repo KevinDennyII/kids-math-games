@@ -113,7 +113,7 @@ export function Home() {
             <div className="cta-art" aria-hidden="true">
               <CharacterSprite src={SPRITES.car} alt="" size="lg" motion="drive" />
             </div>
-            <span className="cta-kicker">For him · AGES 8+</span>
+            <span className="cta-kicker">For him</span>
             <span className="cta-title">Racecar Math League</span>
             <span className="cta-copy">Add, subtract, multiply, divide — pick your mix</span>
           </Link>
@@ -123,7 +123,7 @@ export function Home() {
               <CharacterSprite src={SPRITES.cat} alt="" size="sm" motion="sway" />
               <CharacterSprite src={SPRITES.unicorn} alt="" size="sm" motion="hop" />
             </div>
-            <span className="cta-kicker">For her · AGES 6+</span>
+            <span className="cta-kicker">For her</span>
             <span className="cta-title">Magical Math Academy</span>
             <span className="cta-copy">Add, subtract, multiply, divide — care for pets</span>
           </Link>

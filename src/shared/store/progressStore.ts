@@ -5,6 +5,7 @@ import {
   createMathGameProgress,
   createMathOpProgress,
   mathOpFromProblemType,
+  normalizeAdaptiveState,
   type AdaptiveState,
   type GameId,
   type MathGameId,
@@ -13,7 +14,7 @@ import {
   type MathOpProgress,
   type ProblemType,
 } from '../math/types'
-import { applyAnswer } from '../math/adaptive'
+import { applyAnswer, MATH_ADAPTIVE } from '../math/adaptive'
 import {
   createTypingFoundationState,
   type TypingFoundationState,
@@ -41,10 +42,10 @@ function mergeOps(persisted: Partial<MathOpProgress> | undefined): MathOpProgres
   const base = createMathOpProgress()
   if (!persisted) return base
   return {
-    addition: persisted.addition ?? base.addition,
-    subtraction: persisted.subtraction ?? base.subtraction,
-    multiplication: persisted.multiplication ?? base.multiplication,
-    division: persisted.division ?? base.division,
+    addition: normalizeAdaptiveState(persisted.addition),
+    subtraction: normalizeAdaptiveState(persisted.subtraction),
+    multiplication: normalizeAdaptiveState(persisted.multiplication),
+    division: normalizeAdaptiveState(persisted.division),
   }
 }
 
@@ -70,10 +71,11 @@ function mergeMath(
         persisted.raceOpMode ??
         current.race.opMode,
       ops: mergeOps(raceLegacyOps),
-      mixed:
+      mixed: normalizeAdaptiveState(
         persisted.math?.race?.mixed ??
-        persisted.raceMixed ??
-        current.race.mixed,
+          persisted.raceMixed ??
+          current.race.mixed,
+      ),
     },
     academy: {
       opMode: persisted.math?.academy?.opMode ?? current.academy.opMode,
@@ -84,7 +86,9 @@ function mergeMath(
           persisted.academy ??
           current.academy.ops.addition,
       }),
-      mixed: persisted.math?.academy?.mixed ?? current.academy.mixed,
+      mixed: normalizeAdaptiveState(
+        persisted.math?.academy?.mixed ?? current.academy.mixed,
+      ),
     },
   }
 }
@@ -103,14 +107,18 @@ export const useProgressStore = create<ProgressStore>()(
         if (game === 'race' || game === 'academy') {
           const op = mathOpFromProblemType(problemType ?? 'addition')
           const progress = get().math[game]
-          const opResult = applyAnswer(progress.ops[op], correct)
+          const opResult = applyAnswer(progress.ops[op], correct, MATH_ADAPTIVE)
           const nextProgress: MathGameProgress = {
             ...progress,
             ops: { ...progress.ops, [op]: opResult.state },
           }
 
           if (progress.opMode === 'mixed') {
-            const mixedResult = applyAnswer(progress.mixed, correct)
+            const mixedResult = applyAnswer(
+              progress.mixed,
+              correct,
+              MATH_ADAPTIVE,
+            )
             nextProgress.mixed = mixedResult.state
             set({ math: { ...get().math, [game]: nextProgress } })
             return {
@@ -178,9 +186,9 @@ export const useProgressStore = create<ProgressStore>()(
         const p = (persisted ?? {}) as LegacyMathPersist
         return {
           ...current,
-          clock: p.clock ?? current.clock,
+          clock: normalizeAdaptiveState(p.clock ?? current.clock),
           math: mergeMath(p, current.math),
-          typing: p.typing ?? current.typing,
+          typing: normalizeAdaptiveState(p.typing ?? current.typing),
           typingFoundation: p.typingFoundation ?? current.typingFoundation,
         }
       },

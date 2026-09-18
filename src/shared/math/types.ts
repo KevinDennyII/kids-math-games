@@ -52,6 +52,10 @@ export interface AdaptiveState {
   score: number
   bestStreak: number
   solved: number
+  /** Attempts at the current level (for accuracy-based math leveling). */
+  levelAttempts: number
+  /** Correct answers at the current level. */
+  levelCorrect: number
 }
 
 export const MIN_LEVEL = 1
@@ -65,6 +69,26 @@ export function createAdaptiveState(): AdaptiveState {
     score: 0,
     bestStreak: 0,
     solved: 0,
+    levelAttempts: 0,
+    levelCorrect: 0,
+  }
+}
+
+/** Fill missing fields from older persisted saves. */
+export function normalizeAdaptiveState(
+  partial?: Partial<AdaptiveState> | null,
+): AdaptiveState {
+  const base = createAdaptiveState()
+  if (!partial) return base
+  return {
+    level: partial.level ?? base.level,
+    correctStreak: partial.correctStreak ?? base.correctStreak,
+    wrongStreak: partial.wrongStreak ?? base.wrongStreak,
+    score: partial.score ?? base.score,
+    bestStreak: partial.bestStreak ?? base.bestStreak,
+    solved: partial.solved ?? base.solved,
+    levelAttempts: partial.levelAttempts ?? base.levelAttempts,
+    levelCorrect: partial.levelCorrect ?? base.levelCorrect,
   }
 }
 

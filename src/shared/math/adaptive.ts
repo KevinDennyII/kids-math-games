@@ -1,5 +1,5 @@
 import type { AdaptiveState } from './types'
-import { MAX_LEVEL, MIN_LEVEL } from './types'
+import { MAX_LEVEL, MIN_LEVEL, normalizeAdaptiveState } from './types'
 
 export type AnswerResult = {
   correct: boolean
@@ -10,8 +10,15 @@ export type AnswerResult = {
 }
 
 export type AdaptiveOptions = {
-  /** Correct answers needed to gain a level. Default 3. */
+  /** Correct answers needed to gain a level. Default 3. Ignored when levelUpAccuracy is set. */
   correctPerLevel?: number
+  /**
+   * When set, level up once accuracy at the current level reaches this ratio
+   * (after minAttemptsForLevelUp). Used by race/academy math categories.
+   */
+  levelUpAccuracy?: number
+  /** Minimum attempts before accuracy level-up can trigger. Default 5. */
+  minAttemptsForLevelUp?: number
   /** Cap for this game. Default MAX_LEVEL (3). */
   maxLevel?: number
   /** Wrong answers in a row before dropping a level. Default 2. */
@@ -25,19 +32,41 @@ export type AdaptiveOptions = {
   levelUpBonus?: number
 }
 
-/** After N correct → +1 level; after M wrong in a row → −1 level. */
+/** Race / academy math categories: level up at 80% correct (min 5 attempts). */
+export const MATH_ADAPTIVE: AdaptiveOptions = {
+  levelUpAccuracy: 0.8,
+  minAttemptsForLevelUp: 5,
+}
+
+function resetLevelAccuracy(state: AdaptiveState) {
+  state.levelAttempts = 0
+  state.levelCorrect = 0
+}
+
+function maybeAwardLevelUpBonus(
+  next: AdaptiveState,
+  levelUpBonus: number,
+): number {
+  if (levelUpBonus <= 0) return 0
+  next.score += levelUpBonus
+  return levelUpBonus
+}
+
+/** After N correct → +1 level; or 80% accuracy; after M wrong in a row → −1 level. */
 export function applyAnswer(
   prev: AdaptiveState,
   correct: boolean,
   options: AdaptiveOptions = {},
 ): AnswerResult {
   const correctPerLevel = options.correctPerLevel ?? 3
+  const levelUpAccuracy = options.levelUpAccuracy
+  const minAttemptsForLevelUp = options.minAttemptsForLevelUp ?? 5
   const maxLevel = options.maxLevel ?? MAX_LEVEL
   const wrongToDrop = options.wrongToDrop ?? 2
   const resetStreakOnWrong = options.resetStreakOnWrong ?? true
   const levelUpBonus = options.levelUpBonus ?? 0
 
-  const next: AdaptiveState = { ...prev }
+  const next: AdaptiveState = normalizeAdaptiveState(prev)
   let leveledUp = false
   let leveledDown = false
   let pointsEarned = 0
@@ -50,14 +79,24 @@ export function applyAnswer(
     next.score += pointsEarned
     next.bestStreak = Math.max(next.bestStreak, next.correctStreak)
 
-    if (next.correctStreak > 0 && next.correctStreak % correctPerLevel === 0) {
+    if (levelUpAccuracy != null) {
+      next.levelAttempts += 1
+      next.levelCorrect += 1
+      if (
+        next.levelAttempts >= minAttemptsForLevelUp &&
+        next.levelCorrect / next.levelAttempts >= levelUpAccuracy &&
+        next.level < maxLevel
+      ) {
+        next.level += 1
+        leveledUp = true
+        resetLevelAccuracy(next)
+        pointsEarned += maybeAwardLevelUpBonus(next, levelUpBonus)
+      }
+    } else if (next.correctStreak > 0 && next.correctStreak % correctPerLevel === 0) {
       if (next.level < maxLevel) {
         next.level += 1
         leveledUp = true
-        if (levelUpBonus > 0) {
-          next.score += levelUpBonus
-          pointsEarned += levelUpBonus
-        }
+        pointsEarned += maybeAwardLevelUpBonus(next, levelUpBonus)
       }
     }
   } else {
@@ -66,10 +105,17 @@ export function applyAnswer(
       next.correctStreak = 0
     }
 
+    if (levelUpAccuracy != null) {
+      next.levelAttempts += 1
+    }
+
     if (next.wrongStreak >= wrongToDrop) {
       if (next.level > MIN_LEVEL) {
         next.level -= 1
         leveledDown = true
+        if (levelUpAccuracy != null) {
+          resetLevelAccuracy(next)
+        }
       }
       next.wrongStreak = 0
     }
