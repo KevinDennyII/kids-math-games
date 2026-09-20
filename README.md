@@ -1,6 +1,6 @@
 # Kids Math Games
 
-One web app with four browser games for kids:
+Math and typing games on **dennymathgames.online**. Python Lab is a separate site on **coding.dennymathgames.online** (same Netlify deploy, different hostname).
 
 - **Racecar Math League** (`/race`) — addition, subtraction, multiplication, and division with independent levels (ages 8+)
 - **Magical Math Academy** (`/academy`) — the same four operations with gentler independent levels (ages 6+)
@@ -8,6 +8,24 @@ One web app with four browser games for kids:
 - **Fox Rockets** (`/typing`) — shared falling-words typing for both kids
 
 Progress saves in the browser via `localStorage`. No accounts. No download required.
+
+## Python Lab (`coding.dennymathgames.online`)
+
+Its own site. Kids open that URL — it is not a card on the math home.
+
+In-browser Python (Pyodide): `print`, variables, `if` / `else`, loops, then `forward()` / `left()` / `right()` to drive a little bot, plus a free sandbox. Each mission starts with a short briefing and a check question, then Run.
+
+### Point the subdomain
+
+Same Netlify site, second hostname:
+
+1. DNS: `CNAME coding` → the same Netlify target as `dennymathgames.online`.
+2. Netlify → **Domain management → Add domain alias** → `coding.dennymathgames.online`.
+3. `coding.dennymathgames.online` is Python Lab at `/`. Math games stay on the apex. Visiting `/coding` on the math domain redirects to the coding host.
+
+Local preview (no DNS): `http://localhost:5173/coding`.
+
+Python downloads the Pyodide engine from jsDelivr on first visit (a few seconds, needs network).
 
 ## Run locally
 
@@ -39,7 +57,7 @@ Config is in [`netlify.toml`](netlify.toml) (build + SPA redirects).
    - **Build command:** `npm run build`
    - **Publish directory:** `dist`
    - **Node version:** 22 (set in `netlify.toml`)
-4. Deploy. Deep links (`/race`, `/academy`, `/clock`, `/typing`) work via SPA fallback.
+4. Deploy. Deep links (`/race`, `/academy`, `/clock`, `/typing`, `/coding`) work via SPA fallback.
 
 Optional CLI:
 
@@ -60,4 +78,4 @@ Guided by [Responsive Typography](https://separated-day-526.notion.site/Responsi
 
 ## Stack
 
-React 19 + TypeScript + Vite + React Router + Zustand. CSS-first whimsical motion. Pure TypeScript math engine for adaptive difficulty.
+React 19 + TypeScript + Vite + React Router + Zustand. CSS-first whimsical motion. Pure TypeScript math engine for adaptive difficulty. In-browser Python via Pyodide.

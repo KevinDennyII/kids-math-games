@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { CharacterSprite } from '../shared/characters/CharacterSprite'
 import { SPRITES } from '../shared/characters/sprites'
@@ -84,6 +85,10 @@ function ColorfulKeyboard() {
 }
 
 export function Home() {
+  useEffect(() => {
+    document.title = 'Kids Math Games'
+  }, [])
+
   return (
     <main className="home-shell">
       <div className="home-glow" aria-hidden="true" />

@@ -6,6 +6,7 @@
   NODE_VERSION = "22"
 
 # SPA fallback so /race, /academy, /typing work on refresh
+# coding.dennymathgames.online is the same publish dir; the app picks Python Lab by hostname
 [[redirects]]
   from = "/*"
   to = "/index.html"

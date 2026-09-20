@@ -108,7 +108,9 @@ a {
   .typing-stat span,
   .care-label,
   .race-lap,
-  .pet-chip {
+  .pet-chip,
+  .coding-kicker,
+  .coding-tagline {
     font-size: var(--text-sm);
   }
 }
