@@ -13,7 +13,7 @@ type Particle = {
 
 type Props = {
   trigger: number
-  palette?: 'race' | 'academy' | 'clock'
+  palette?: 'race' | 'academy' | 'clock' | 'brain'
 }
 
 function random(min: number, max: number) {
@@ -25,7 +25,7 @@ export function BurstParticles({ trigger, palette = 'academy' }: Props) {
   const [particles, setParticles] = useState<Particle[]>([])
 
   const baseHue =
-    palette === 'race' ? 30 : palette === 'clock' ? 20 : 320
+    palette === 'race' ? 30 : palette === 'clock' ? 20 : palette === 'brain' ? 270 : 320
 
   useEffect(() => {
     if (trigger === 0 || prefersReduced) return

@@ -5,8 +5,8 @@
 [build.environment]
   NODE_VERSION = "22"
 
-# SPA fallback so /race, /academy, /typing work on refresh
-# coding.dennymathgames.online is the same publish dir; the app picks Python Lab by hostname
+# SPA fallback so /race, /academy, /typing, /brain work on refresh
+# coding. and braingames. dennymathgames.online share this publish dir; the app picks the site by hostname
 [[redirects]]
   from = "/*"
   to = "/index.html"

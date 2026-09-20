@@ -110,7 +110,10 @@ a {
   .race-lap,
   .pet-chip,
   .coding-kicker,
-  .coding-tagline {
+  .coding-tagline,
+  .brain-kicker,
+  .brain-skill,
+  .brain-why {
     font-size: var(--text-sm);
   }
 }

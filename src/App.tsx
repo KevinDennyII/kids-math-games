@@ -11,6 +11,12 @@ import {
   isCodingHost,
   shouldPreviewPythonOnMathHost,
 } from './coding/host'
+import {
+  BrainLayout,
+  MathBrainLayout,
+} from './brain/BrainApp'
+import { brainGameRouteNodes } from './brain/brainRoutes'
+import { isBrainHost } from './brain/host'
 
 function RedirectToCodingSite() {
   useEffect(() => {
@@ -38,6 +44,16 @@ export default function App() {
     )
   }
 
+  if (isBrainHost(window.location.hostname)) {
+    return (
+      <BrowserRouter>
+        <Routes>
+          <Route element={<BrainLayout />}>{brainGameRouteNodes('/')}</Route>
+        </Routes>
+      </BrowserRouter>
+    )
+  }
+
   return (
     <BrowserRouter>
       <Routes>
@@ -48,6 +64,9 @@ export default function App() {
         <Route path="/typing" element={<TypingGame />} />
         <Route path="/coding" element={<MathCodingPath />} />
         <Route path="/coding/*" element={<MathCodingPath />} />
+        <Route path="/brain" element={<MathBrainLayout />}>
+          {brainGameRouteNodes('/brain')}
+        </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

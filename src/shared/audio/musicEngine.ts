@@ -1,4 +1,4 @@
-export type MusicTheme = 'race' | 'academy' | 'typing' | 'clock' | 'coding'
+export type MusicTheme = 'race' | 'academy' | 'typing' | 'clock' | 'coding' | 'brain'
 export type SfxKind = 'correct' | 'wrong' | 'ding'
 
 type ThemeConfig = {
@@ -91,6 +91,21 @@ const THEMES: Record<MusicTheme, ThemeConfig> = {
     bass: [
       196.0, null, 246.94, null, 196.0, null, 164.81, null,
       146.83, null, 164.81, null, 196.0, null, 246.94, null,
+    ],
+  },
+  brain: {
+    bpm: 96,
+    wave: 'sine',
+    bassWave: 'triangle',
+    melodyGain: 0.04,
+    bassGain: 0.02,
+    melody: [
+      440.0, 523.25, 392.0, 349.23, 392.0, 440.0, 523.25, null,
+      587.33, 523.25, 440.0, 392.0, 349.23, 392.0, 440.0, null,
+    ],
+    bass: [
+      220.0, null, 196.0, null, 174.61, null, 196.0, null,
+      220.0, null, 246.94, null, 220.0, null, 196.0, null,
     ],
   },
 }

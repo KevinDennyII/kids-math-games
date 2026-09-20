@@ -1,6 +1,6 @@
 # Kids Math Games
 
-Math and typing games on **dennymathgames.online**. Python Lab is a separate site on **coding.dennymathgames.online** (same Netlify deploy, different hostname).
+Math and typing games on **dennymathgames.online**. Python Lab is on **coding.dennymathgames.online**. Brain Games is on **braingames.dennymathgames.online**. Same Netlify deploy, different hostnames.
 
 - **Racecar Math League** (`/race`) — addition, subtraction, multiplication, and division with independent levels (ages 8+)
 - **Magical Math Academy** (`/academy`) — the same four operations with gentler independent levels (ages 6+)
@@ -27,6 +27,32 @@ Local preview (no DNS): `http://localhost:5173/coding`.
 
 Python downloads the Pyodide engine from jsDelivr on first visit (a few seconds, needs network).
 
+## Brain Games (`braingames.dennymathgames.online`)
+
+Its own site. Kids and grown-ups open that URL — it is not a card on the math home.
+
+Short adaptive puzzles built around lab tasks (not a medical treatment):
+
+- **Flash Find** — processing speed / useful field of view (ACTIVE-style speed training)
+- **Echo Path** — spatial working memory (Corsi block-tapping)
+- **Color Catch** — inhibitory control (Stroop)
+- **Hold Fast** — go/no-go response control
+- **Shape Twist** — mental rotation
+- **Pattern Peek** — fluid reasoning (matrix rules)
+- **Daily Spark** — a short mix of all six
+
+Difficulty climbs with streaks. Progress saves in the browser.
+
+### Point the subdomain
+
+Same Netlify site, extra hostname:
+
+1. DNS: `CNAME braingames` → the same Netlify target as `dennymathgames.online`.
+2. Netlify → **Domain management → Add domain alias** → `braingames.dennymathgames.online`.
+3. `braingames.dennymathgames.online` is Brain Games at `/`. Visiting `/brain` on the math domain redirects to the brain host.
+
+Local preview (no DNS): `http://localhost:5173/brain`.
+
 ## Run locally
 
 ```bash
@@ -43,7 +69,7 @@ Open the URL Vite prints (usually `http://localhost:5173`).
 | `npm run dev` | Local Vite server |
 | `npm run build` | Production build to `dist/` |
 | `npm run preview` | Preview production build |
-| `npm test` | Unit tests for math engine |
+| `npm test` | Unit tests for math, coding, and brain engines |
 | `npm run lint` | Oxlint |
 | `npm run clean` | Remove dead/generated files, lint, test, and verify build |
 
@@ -57,7 +83,7 @@ Config is in [`netlify.toml`](netlify.toml) (build + SPA redirects).
    - **Build command:** `npm run build`
    - **Publish directory:** `dist`
    - **Node version:** 22 (set in `netlify.toml`)
-4. Deploy. Deep links (`/race`, `/academy`, `/clock`, `/typing`, `/coding`) work via SPA fallback.
+4. Deploy. Deep links (`/race`, `/academy`, `/clock`, `/typing`, `/coding`, `/brain`) work via SPA fallback.
 
 Optional CLI:
 

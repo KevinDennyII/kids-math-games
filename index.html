@@ -15,6 +15,16 @@
       rel="stylesheet"
     />
     <title>Kids Math Games</title>
+    <script>
+      (function () {
+        var host = location.hostname
+        if (host === 'braingames.dennymathgames.online' || host.indexOf('braingames.') === 0) {
+          document.title = 'Brain Games'
+        } else if (host === 'coding.dennymathgames.online' || host.indexOf('coding.') === 0) {
+          document.title = 'Python Lab'
+        }
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>
