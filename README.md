@@ -13,7 +13,7 @@ Progress saves in the browser via `localStorage`. No accounts. No download requi
 
 Its own site. Kids open that URL — it is not a card on the math home.
 
-In-browser Python (Pyodide): `print`, variables, `if` / `else`, loops, then `forward()` / `left()` / `right()` to drive a little bot, plus a free sandbox. Each mission starts with a short briefing and a check question, then Run.
+In-browser Python (Pyodide), Codecademy-style for kids: eight levels with Minecraft-inspired badges, lesson on the left, editor + labeled Output on the right. After level 4, kids unlock **Memory Squares** — a tiny 4-tile matching app powered by a Python list. Later levels cover lists, bot driving, and a free crafting table.
 
 ### Point the subdomain
 

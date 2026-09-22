@@ -7,9 +7,8 @@ export type PythonRunResult = {
 }
 
 type Pyodide = {
+  runPython: (code: string) => unknown
   runPythonAsync: (code: string) => Promise<unknown>
-  setStdout: (opts: { batched?: (text: string) => void }) => void
-  setStderr: (opts: { batched?: (text: string) => void }) => void
   registerJsModule: (name: string, mod: object) => void
 }
 
@@ -109,28 +108,48 @@ function toCommandN(value: unknown): number {
   return Math.min(8, Math.floor(n))
 }
 
+function readBuffer(py: Pyodide): string {
+  try {
+    const value = py.runPython('_kmg_buf.getvalue() if "_kmg_buf" in dir() else ""')
+    return typeof value === 'string' ? value : String(value ?? '')
+  } catch {
+    return ''
+  }
+}
+
+function restoreStdio(py: Pyodide) {
+  try {
+    py.runPython(`
+import sys
+sys.stdout = sys.__stdout__
+sys.stderr = sys.__stderr__
+`)
+  } catch {
+    // ignore restore failures after a crash
+  }
+}
+
+function displayValue(raw: unknown): string | null {
+  if (typeof raw === 'boolean' || typeof raw === 'number' || typeof raw === 'bigint') {
+    return String(raw)
+  }
+  if (typeof raw === 'string' && raw.length > 0) return raw
+  return null
+}
+
 export async function runPython(code: string): Promise<PythonRunResult> {
   botBuffer.commands = []
-  let stdout = ''
-  let stderr = ''
 
   try {
     const py = await ensurePython()
-    py.setStdout({
-      batched: (text) => {
-        stdout += text.endsWith('\n') ? text : `${text}\n`
-      },
-    })
-    py.setStderr({
-      batched: (text) => {
-        stderr += text
-      },
-    })
-
-    const prelude = `
+    py.runPython(`
+import sys, io
 from botlab import forward, left, right, back
-`
-    const run = py.runPythonAsync(`${prelude}\n${code}`)
+_kmg_buf = io.StringIO()
+sys.stdout = _kmg_buf
+sys.stderr = _kmg_buf
+`)
+
     let timer = 0
     const timeout = new Promise<never>((_, reject) => {
       timer = window.setTimeout(
@@ -138,18 +157,30 @@ from botlab import forward, left, right, back
         RUN_MS,
       )
     })
+
     try {
-      await Promise.race([run, timeout])
+      const run = py.runPythonAsync(code)
+      const raw = await Promise.race([run, timeout])
+      const printed = readBuffer(py)
+      const extra = printed.trim() ? null : displayValue(raw)
+      return {
+        stdout: extra ? `${printed}${printed.endsWith('\n') || printed === '' ? '' : '\n'}${extra}` : printed.replace(/\n$/, ''),
+        commands: [...botBuffer.commands],
+      }
+    } catch (err) {
+      const printed = readBuffer(py)
+      const message = err instanceof Error ? err.message : 'Python hit a problem.'
+      return {
+        stdout: printed.replace(/\n$/, ''),
+        commands: [...botBuffer.commands],
+        error: message,
+      }
     } finally {
       window.clearTimeout(timer)
-    }
-    return {
-      stdout: stdout.trimEnd(),
-      commands: [...botBuffer.commands],
-      error: stderr.trim() ? stderr.trim() : undefined,
+      restoreStdio(py)
     }
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Python hit a problem.'
-    return { stdout: stdout.trimEnd(), commands: [...botBuffer.commands], error: message }
+    return { stdout: '', commands: [...botBuffer.commands], error: message }
   }
 }

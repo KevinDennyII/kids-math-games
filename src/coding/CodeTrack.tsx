@@ -1,14 +1,16 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import { useGameMusic } from '../shared/audio/useGameMusic'
 import { BurstParticles } from '../shared/motion/BurstParticles'
 import { ArenaGrid } from './ArenaGrid'
 import { CodingHeader } from './CodingHeader'
 import {
   PYTHON_MISSIONS,
+  firstOpenMissionIndex,
   isMissionUnlocked,
   type Mission,
 } from './curriculum'
-import { MissionFlow } from './MissionFlow'
+import { LevelBadge } from './LevelBadge'
+import { MemorySquares } from './MemorySquares'
 import { gradePython, PYTHON_CHALLENGES } from './python/challenges'
 import {
   ensurePython,
@@ -36,12 +38,13 @@ export function PythonLab() {
   const completeMission = useCodingStore((s) => s.completeMission)
   const reset = useCodingStore((s) => s.reset)
   const { muted, setMuted, playSfx } = useGameMusic('coding')
-  const [missionId, setMissionId] = useState<string | null>(null)
-  const [passed, setPassed] = useState(false)
+  const [missionId, setMissionId] = useState(
+    () => PYTHON_MISSIONS[firstOpenMissionIndex(completed)]?.id ?? 'hello',
+  )
   const [engine, setEngine] = useState<PythonStatus>(getPythonStatus)
   const [burstKey, setBurstKey] = useState(0)
 
-  const mission = PYTHON_MISSIONS.find((m) => m.id === missionId) ?? null
+  const mission = PYTHON_MISSIONS.find((m) => m.id === missionId) ?? PYTHON_MISSIONS[0]!
 
   useEffect(() => {
     document.title = 'Python Lab'
@@ -50,80 +53,128 @@ export function PythonLab() {
     return unsub
   }, [])
 
+  useEffect(() => {
+    if (isMissionUnlocked(missionId, completed)) return
+    const next = PYTHON_MISSIONS[firstOpenMissionIndex(completed)]
+    if (next) setMissionId(next.id)
+  }, [completed, missionId])
+
+  const goNext = () => {
+    const index = PYTHON_MISSIONS.findIndex((m) => m.id === mission.id)
+    const next = PYTHON_MISSIONS[index + 1]
+    if (next && isMissionUnlocked(next.id, completed)) setMissionId(next.id)
+  }
+
   return (
     <main className="coding-shell">
       <CodingHeader
         title="Python Lab"
+        status={
+          engine === 'ready'
+            ? 'Python is ready in this browser.'
+            : engine === 'loading'
+              ? 'Loading Python — first time can take a few seconds.'
+              : engine === 'error'
+                ? 'Could not load Python. Check the network, then refresh.'
+                : 'Python is waking up…'
+        }
+        statusKind={engine}
         muted={muted}
         onToggleMute={() => setMuted(!muted)}
         onReset={reset}
+        cheer={burstKey}
       />
-      <p className="coding-engine" data-status={engine}>
-        {engine === 'ready'
-          ? 'Python brain is ready in this browser.'
-          : engine === 'loading'
-            ? 'Waking the Python brain — first load can take a few seconds.'
-            : engine === 'error'
-              ? 'Could not load Python. Check the network, then refresh.'
-              : 'Python engine is cold until this page opens.'}
-      </p>
       <BurstParticles trigger={burstKey} palette="race" />
 
-      {!mission ? (
-        <section className="coding-mission-list">
-          <p className="coding-tagline">
-            Type real Python and run it here. print, variables, if, loops — then
-            drive a little bot with code.
-          </p>
-          {PYTHON_MISSIONS.map((item) => {
-            const unlocked = isMissionUnlocked(item.id, completed)
-            const done = completed.includes(item.id)
-            return (
-              <button
-                key={item.id}
-                type="button"
-                className={`coding-mission ${done ? 'is-done' : ''}`}
-                disabled={!unlocked}
-                onClick={() => {
-                  setMissionId(item.id)
-                  setPassed(false)
-                }}
-              >
-                <span className="cta-kicker">
-                  {item.subtitle}
-                  {done ? ' · done' : unlocked ? '' : ' · locked'}
-                </span>
-                <span className="cta-title">{item.title}</span>
-              </button>
-            )
-          })}
-        </section>
-      ) : !passed ? (
-        <>
-          <button type="button" className="coding-text-btn" onClick={() => setMissionId(null)}>
-            ← Missions
-          </button>
-          <MissionFlow mission={mission} onPassed={() => setPassed(true)} />
-        </>
-      ) : (
-        <>
-          <button type="button" className="coding-text-btn" onClick={() => setMissionId(null)}>
-            ← Missions
-          </button>
-          <PythonEditor
-            mission={mission}
-            engine={engine}
-            onSolved={() => {
-              completeMission(mission.id)
-              playSfx('correct')
-              setBurstKey((k) => k + 1)
-            }}
-            onWrong={() => playSfx('wrong')}
-          />
-          <p className="coding-parent">Ask him: {mission.askAfter}</p>
-        </>
-      )}
+      <div className="coding-workspace">
+        <LessonPane
+          mission={mission}
+          completed={completed}
+          onPick={setMissionId}
+        />
+        <PythonEditor
+          key={mission.id}
+          mission={mission}
+          engine={engine}
+          onSolved={() => {
+            completeMission(mission.id)
+            playSfx('correct')
+            setBurstKey((k) => k + 1)
+          }}
+          onWrong={() => playSfx('wrong')}
+          onNext={goNext}
+          hasNext={Boolean(
+            PYTHON_MISSIONS[PYTHON_MISSIONS.findIndex((m) => m.id === mission.id) + 1],
+          )}
+        />
+      </div>
     </main>
+  )
+}
+
+function LessonPane({
+  mission,
+  completed,
+  onPick,
+}: {
+  mission: Mission
+  completed: readonly string[]
+  onPick: (id: string) => void
+}) {
+  return (
+    <aside className="coding-lesson" aria-label="Lesson">
+      <ol className="coding-toc">
+        {PYTHON_MISSIONS.map((item) => {
+          const unlocked = isMissionUnlocked(item.id, completed)
+          const done = completed.includes(item.id)
+          const current = item.id === mission.id
+          const badgeState = done ? 'earned' : current ? 'current' : 'locked'
+          return (
+            <li key={item.id}>
+              <button
+                type="button"
+                className={`coding-toc-item${current ? ' is-now' : ''}${done ? ' is-done' : ''}${item.kind === 'project' ? ' is-project' : ''}`}
+                disabled={!unlocked}
+                aria-current={current ? 'step' : undefined}
+                onClick={() => onPick(item.id)}
+              >
+                <LevelBadge
+                  badge={item.badge}
+                  state={badgeState}
+                  size={26}
+                  title={item.badgeLabel}
+                />
+                <span className="coding-toc-copy">
+                  <span className="coding-toc-level">Level {item.level}</span>
+                  <span className="coding-toc-label">{item.title}</span>
+                </span>
+              </button>
+            </li>
+          )
+        })}
+      </ol>
+
+      <p className="coding-kicker">
+        Level {mission.level} · {mission.skill}
+        {mission.kind === 'project' ? ' · project' : ''}
+      </p>
+      <h2 className="coding-lesson-title">{mission.title}</h2>
+      {mission.steps.map((step) => (
+        <p key={step} className="coding-sub">
+          {step}
+        </p>
+      ))}
+      <div className="coding-task">
+        <p className="coding-kicker">Your task</p>
+        <p>{mission.task}</p>
+      </div>
+      {completed.includes(mission.id) ? (
+        <p className="coding-badge-earned">
+          <LevelBadge badge={mission.badge} state="earned" size={22} title={mission.badgeLabel} />
+          Earned: {mission.badgeLabel}
+        </p>
+      ) : null}
+    </aside>
   )
 }
 
@@ -132,29 +183,44 @@ function PythonEditor({
   engine,
   onSolved,
   onWrong,
+  onNext,
+  hasNext,
 }: {
   mission: Mission
   engine: PythonStatus
   onSolved: () => void
   onWrong: () => void
+  onNext: () => void
+  hasNext: boolean
 }) {
   const challenge = PYTHON_CHALLENGES[mission.id]
+  const isProject = mission.kind === 'project'
+  const isPlayground = mission.kind === 'playground'
   const [code, setCode] = useState(challenge?.starter ?? 'print("hello")\n')
   const [stdout, setStdout] = useState('')
-  const [error, setError] = useState<string | null>(null)
+  const [pyError, setPyError] = useState<string | null>(null)
+  const [feedback, setFeedback] = useState<string | null>(null)
+  const [ok, setOk] = useState(false)
   const [busy, setBusy] = useState(false)
   const [bot, setBot] = useState<BotState>(() => createBot(BOT_ARMOR))
   const [hintOn, setHintOn] = useState(false)
   const [solved, setSolved] = useState(false)
+  const [codeReady, setCodeReady] = useState(false)
+  const [ran, setRan] = useState(false)
   const animRef = useRef(0)
   const { grid } = parseArena()
+  const showArena = mission.id === 'drive' || resultHasDrive(code)
 
   useEffect(() => {
     setCode(challenge?.starter ?? 'print("hello")\n')
     setStdout('')
-    setError(null)
+    setPyError(null)
+    setFeedback(null)
+    setOk(false)
     setSolved(false)
+    setCodeReady(false)
     setHintOn(false)
+    setRan(false)
     setBot(createBot(BOT_ARMOR))
     return () => window.clearTimeout(animRef.current)
   }, [mission.id, challenge?.starter])
@@ -179,70 +245,150 @@ function PythonEditor({
     if (steps.length) tick()
   }
 
+  const markSolved = (message: string) => {
+    if (!solved) onSolved()
+    setSolved(true)
+    setOk(true)
+    setFeedback(message)
+  }
+
   const run = async () => {
     if (busy || engine !== 'ready') return
     setBusy(true)
-    setError(null)
+    setPyError(null)
+    setFeedback(null)
+    setOk(false)
     const result = await runPython(code)
+    setRan(true)
     setStdout(result.stdout)
     setBusy(false)
+
     if (result.error) {
-      setError(result.error)
+      setPyError(result.error)
       onWrong()
       return
     }
+
     animate(result.commands)
     const sim = runCommands(result.commands, BOT_ARMOR)
-    if (!challenge || mission.id === 'sandbox') {
-      if (!solved) onSolved()
-      setSolved(true)
+
+    if (isPlayground || !challenge) {
+      markSolved('Nice. Read the Output panel — that is your program talking.')
       return
     }
+
     const grade = gradePython(challenge, result.stdout, sim.state.goal)
-    if (grade.ok) {
-      if (!solved) onSolved()
-      setSolved(true)
-      setError(null)
-    } else {
-      setError(grade.message)
+    if (!grade.ok) {
+      setCodeReady(false)
+      setFeedback(grade.message)
       onWrong()
+      return
     }
+
+    if (isProject) {
+      setCodeReady(true)
+      setOk(true)
+      setFeedback('List looks good — now play Memory Squares and match both pairs.')
+      return
+    }
+
+    markSolved(grade.message)
   }
 
+  const onEditorKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
+    if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
+      event.preventDefault()
+      void run()
+      return
+    }
+    if (event.key !== 'Tab') return
+    event.preventDefault()
+    const el = event.currentTarget
+    const start = el.selectionStart
+    const end = el.selectionEnd
+    const next = `${code.slice(0, start)}    ${code.slice(end)}`
+    setCode(next)
+    requestAnimationFrame(() => {
+      el.selectionStart = el.selectionEnd = start + 4
+    })
+  }
+
+  const consoleText = pyError
+    ? [stdout, stdout ? '' : null, pyError].filter((part) => part != null).join('\n')
+    : stdout
+  const consoleEmpty = !consoleText && !busy && !ran
+
   return (
-    <section className="coding-panel coding-editor-wrap">
-      <p className="coding-kicker">{mission.title}</p>
-      <h2>Type, then Run</h2>
+    <section className="coding-lab" aria-label="Code editor">
+      <div className="coding-editor-chrome">
+        <span className="coding-kicker">script.py</span>
+        <span className="coding-editor-hint">Tab indents · ⌘/Ctrl+Enter runs</span>
+      </div>
       <textarea
-        className="coding-editor"
+        className={`coding-editor${isProject ? ' is-compact' : ''}`}
         spellCheck={false}
         autoCapitalize="off"
         autoCorrect="off"
         value={code}
         onChange={(e) => setCode(e.target.value)}
+        onKeyDown={onEditorKeyDown}
         aria-label="Python code"
       />
       <div className="coding-row">
-        <button type="button" className="coding-btn coding-btn-play" onClick={() => void run()} disabled={busy || engine !== 'ready'}>
-          {busy ? 'Running…' : 'Run'}
+        <button
+          type="button"
+          className="coding-btn coding-btn-play"
+          onClick={() => void run()}
+          disabled={busy || engine !== 'ready'}
+        >
+          {busy ? 'Running…' : engine === 'ready' ? 'Run' : 'Wait for Python…'}
         </button>
         <button type="button" className="coding-text-btn" onClick={() => setHintOn((v) => !v)}>
           {hintOn ? 'Hide hint' : 'Hint'}
         </button>
+        {solved && hasNext ? (
+          <button type="button" className="coding-btn" onClick={onNext}>
+            Next lesson
+          </button>
+        ) : null}
       </div>
       {hintOn && challenge ? <p className="coding-sub">{challenge.hint}</p> : null}
-      {mission.id === 'drive' || resultHasDrive(code) ? (
-        <ArenaGrid bot={bot} armor={BOT_ARMOR} grid={grid} />
+
+      <div className="coding-console">
+        <div className="coding-console-bar">Output</div>
+        <pre
+          className={`coding-out${pyError ? ' is-error' : ''}${consoleEmpty ? ' is-empty' : ''}${isProject ? ' is-compact' : ''}`}
+          aria-live="polite"
+        >
+          {busy && !consoleText
+            ? 'Running…'
+            : consoleEmpty
+              ? 'Click Run. Results show here.'
+              : consoleText || '(no output)'}
+        </pre>
+      </div>
+
+      {feedback ? (
+        <p className={ok ? 'coding-ok' : 'coding-warn'} role="status">
+          {feedback}
+        </p>
       ) : null}
-      <pre className="coding-out" aria-live="polite">
-        {error ? `Error: ${error}\n` : ''}
-        {stdout || (busy ? '…' : 'Output shows here.')}
-      </pre>
-      {solved ? <p className="coding-ok">Mission complete. Read the output out loud to a parent.</p> : null}
+
+      {isProject ? (
+        <MemorySquares
+          enabled={codeReady}
+          onWin={() => {
+            markSolved('You matched both pairs — Emerald badge unlocked!')
+          }}
+        />
+      ) : null}
+
+      {showArena ? <ArenaGrid bot={bot} armor={BOT_ARMOR} grid={grid} /> : null}
     </section>
   )
 }
 
 function resultHasDrive(code: string): boolean {
-  return /\b(forward|left|right|back)\s*\(/.test(code)
+  const uncommented = code.replace(/#.*$/gm, '')
+  return /\b(forward|left|right|back)\s*\(/.test(uncommented)
 }

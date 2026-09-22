@@ -31,8 +31,8 @@ export const useCodingStore = create<CodingStore>()(
       },
       reset: () => set({ ...INITIAL }),
     }),
-    {
-      name: 'kids-coding-progress-v1',
+{
+  name: 'kids-coding-progress-v2',
       merge: (persisted, current) => ({
         ...current,
         ...normalize(persisted as Partial<CodingProgress> | null),

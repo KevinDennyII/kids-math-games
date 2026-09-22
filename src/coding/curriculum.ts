@@ -1,139 +1,149 @@
-export type ListenCheck = {
-  question: string
-  options: string[]
-  answer: string
-}
+export type BadgeId =
+  | 'dirt'
+  | 'wood'
+  | 'cobble'
+  | 'iron'
+  | 'emerald'
+  | 'gold'
+  | 'redstone'
+  | 'diamond'
+
+export type MissionKind = 'lesson' | 'project' | 'playground'
 
 export type Mission = {
   id: string
+  level: number
   title: string
-  subtitle: string
-  /** Spoken / on-screen briefing. Kid must hear or read this first. */
-  briefing: string[]
-  check: ListenCheck
-  /** What to ask him after (parent prompt). */
-  askAfter: string
+  skill: string
+  badge: BadgeId
+  badgeLabel: string
+  kind: MissionKind
+  /** Short readable lesson, Codecademy-style. */
+  steps: string[]
+  /** What to do in the editor / project. */
+  task: string
 }
 
 export const PYTHON_MISSIONS: Mission[] = [
   {
     id: 'hello',
-    title: 'Say hello',
-    subtitle: 'print',
-    briefing: [
-      'Python is a language people type, not drag as blocks.',
-      'print tells the computer to show a message.',
-      'Quotes wrap the words you want to say.',
-      'The computer only does what you actually typed.',
+    level: 1,
+    title: 'Print a message',
+    skill: 'print',
+    badge: 'dirt',
+    badgeLabel: 'Dirt Block',
+    kind: 'lesson',
+    steps: [
+      'Python is a language you type, like a story the computer follows line by line.',
+      'print() shows words on the screen. Put the words in quotes inside the parentheses.',
+      'Click Run. Your result shows in the Output panel under the code — that panel is the computer talking back.',
     ],
-    check: {
-      question: 'Which command shows a message on the screen?',
-      options: ['print', 'armor', 'wheel'],
-      answer: 'print',
-    },
-    askAfter: 'What did your program print, and what line made that happen?',
+    task: 'Run the code. Output should show: Hello, Python!',
   },
   {
     id: 'variables',
-    title: 'Name a number',
-    subtitle: 'variables',
-    briefing: [
-      'A variable is a name that holds a value, like speed = 3.',
-      'You can print the name to see what is inside.',
-      'If you change the number, the next print shows the new one.',
+    level: 2,
+    title: 'Save a number',
+    skill: 'variables',
+    badge: 'wood',
+    badgeLabel: 'Oak Log',
+    kind: 'lesson',
+    steps: [
+      'A variable is a name that holds a value, like putting 3 in a box labeled speed.',
+      'Write speed = 3 to store it. Then print(speed) to see what is inside the box.',
+      'The Output panel prints the number, not the word speed.',
     ],
-    check: {
-      question: 'What is a variable?',
-      options: [
-        'A name that holds a value',
-        'A kind of wheel',
-        'A 3D printer',
-      ],
-      answer: 'A name that holds a value',
-    },
-    askAfter: 'What did you name your variable, and what number did you store?',
+    task: 'Make a variable named speed with the value 3, then print it.',
   },
   {
     id: 'branch',
-    title: 'If this, then that',
-    subtitle: 'if / else',
-    briefing: [
-      'if means: only do this when something is true.',
-      'else means: do this other thing when it is not true.',
-      'This is how a program picks a path.',
+    level: 3,
+    title: 'Make a choice',
+    skill: 'if / else',
+    badge: 'cobble',
+    badgeLabel: 'Cobblestone',
+    kind: 'lesson',
+    steps: [
+      'if means: only run these lines when something is true.',
+      'else means: run these other lines when it is not true.',
+      'Indent the lines under if and else with a tab or four spaces. Python cares about that.',
     ],
-    check: {
-      question: 'When does an else block run?',
-      options: [
-        'When the if is not true',
-        'Always, even if if is true',
-        'Only on Tuesdays',
-      ],
-      answer: 'When the if is not true',
-    },
-    askAfter: 'What happens in your code when the if is true versus when it is not?',
+    task: 'If armor is "walls", print defense. Otherwise print attack.',
   },
   {
     id: 'loops',
+    level: 4,
     title: 'Repeat it',
-    subtitle: 'for loops',
-    briefing: [
-      'A loop repeats instructions so you do not type the same line four times.',
-      'for i in range(4) means do the body four times.',
-      'If the count is wrong, the program overshoots.',
+    skill: 'for loops',
+    badge: 'iron',
+    badgeLabel: 'Iron Ingot',
+    kind: 'lesson',
+    steps: [
+      'A loop repeats lines so you do not copy the same code over and over.',
+      'for i in range(4): means “do the indented lines 4 times.”',
+      'The Output panel should show the same word once per repeat.',
     ],
-    check: {
-      question: 'What does for i in range(4) do?',
-      options: [
-        'Repeats the indented lines 4 times',
-        'Deletes your robot',
-        'Prints the number 4 only',
-      ],
-      answer: 'Repeats the indented lines 4 times',
-    },
-    askAfter: 'Why is a loop better than writing the same line four times by hand?',
+    task: 'Use a for loop with range(4) that prints the word forward each time.',
+  },
+  {
+    id: 'memory',
+    level: 5,
+    title: 'Memory Squares',
+    skill: 'first app',
+    badge: 'emerald',
+    badgeLabel: 'Emerald',
+    kind: 'project',
+    steps: [
+      'You finished the first four skills. Now you build a tiny app: Memory Squares.',
+      'A list holds several values in order, like tiles = ["creeper", "chicken", "creeper", "chicken"].',
+      'Run your list code to power the game. Then flip the four tiles — match both pairs to win your Emerald badge.',
+    ],
+    task: 'Print a list with creeper and chicken each appearing twice. Then play Memory Squares and match both pairs.',
+  },
+  {
+    id: 'lists',
+    level: 6,
+    title: 'Build a chest',
+    skill: 'lists',
+    badge: 'gold',
+    badgeLabel: 'Gold Ingot',
+    kind: 'lesson',
+    steps: [
+      'Lists can hold more than game tiles. chest = ["torch", "pick", "bread"] stores three items.',
+      'print(chest[0]) shows the first item. In Python, counting starts at 0.',
+      'print(len(chest)) shows how many items are in the chest.',
+    ],
+    task: 'Make a list named chest with three items: torch, pick, bread. Print the first item, then print how many items.',
   },
   {
     id: 'drive',
-    title: 'Code the robot',
-    subtitle: 'forward, left, right',
-    briefing: [
-      'Now the code drives a little bot. You are not holding the sticks.',
-      'forward(), left(), and right() queue moves. The bot then follows that list.',
-      'It will do exactly what you typed — even if you meant something else.',
-      'Plan the path around hazards, then run it.',
+    level: 7,
+    title: 'Drive with code',
+    skill: 'functions',
+    badge: 'redstone',
+    badgeLabel: 'Redstone',
+    kind: 'lesson',
+    steps: [
+      'These helpers move a bot: forward(), forward(n), left(), right().',
+      'The bot starts facing right. Orange tiles hurt. Gray tiles are walls. The green flag is the goal.',
+      'The computer does exactly what you typed — even if you meant a different turn.',
     ],
-    check: {
-      question: 'If you type the wrong turn, what does the robot do?',
-      options: [
-        'It guesses what you meant',
-        'It follows the typed turn anyway',
-        'It shuts off forever',
-      ],
-      answer: 'It follows the typed turn anyway',
-    },
-    askAfter: 'Walk me through the path your program took to the flag.',
+    task: 'Write moves that get the bot to the green flag without dying.',
   },
   {
-    id: 'sandbox',
-    title: 'Free lab',
-    subtitle: 'Try your own scripts',
-    briefing: [
-      'This is your workshop. print, math, loops, and robot moves all work here.',
-      'If the program hangs, you can stop and try again.',
-      'Read your output. That is how programmers debug.',
-      'Have a plan before you mash Run.',
+    id: 'craft',
+    level: 8,
+    title: 'Crafting table',
+    skill: 'free code',
+    badge: 'diamond',
+    badgeLabel: 'Diamond',
+    kind: 'playground',
+    steps: [
+      'This is your crafting table — no checklist. Mix print, lists, loops, or bot moves.',
+      'If something looks wrong, read the Output panel. That is how programmers debug.',
+      'Earn the Diamond badge the first time you Run anything here.',
     ],
-    check: {
-      question: 'What should you do before you hit Run?',
-      options: [
-        'Have a plan for what the code should do',
-        'Close your eyes',
-        'Delete all the lines',
-      ],
-      answer: 'Have a plan for what the code should do',
-    },
-    askAfter: 'What did you try, and what did the output tell you?',
+    task: 'Try anything. Watch Output after each Run.',
   },
 ]
 
@@ -147,13 +157,15 @@ export function isMissionUnlocked(
   id: string,
   completed: readonly string[],
 ): boolean {
-  if (id === 'sandbox') return true
   const index = PYTHON_ORDER.indexOf(id)
   if (index <= 0) return true
   const prev = PYTHON_ORDER[index - 1]
   return prev != null && completed.includes(prev)
 }
 
-export function checkAnswer(mission: Mission, choice: string): boolean {
-  return choice === mission.check.answer
+export function firstOpenMissionIndex(completed: readonly string[]): number {
+  const index = PYTHON_MISSIONS.findIndex(
+    (m) => !completed.includes(m.id) && isMissionUnlocked(m.id, completed),
+  )
+  return index >= 0 ? index : Math.max(0, PYTHON_MISSIONS.length - 1)
 }

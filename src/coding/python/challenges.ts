@@ -4,6 +4,8 @@ export type PythonChallenge = {
   hint: string
   /** Substrings that must appear in stdout (after strip). */
   stdoutIncludes?: string[]
+  /** Substring must appear at least this many times. */
+  stdoutCounts?: Record<string, number>
   /** If set, robot must reach the goal. */
   mustReachGoal?: boolean
   /** Exact stdout lines (trimmed), in order. */
@@ -20,6 +22,25 @@ export function stdoutContainsAll(
 ): boolean {
   const text = normalizeStdout(stdout)
   return needles.every((needle) => text.includes(needle))
+}
+
+export function stdoutMeetsCounts(
+  stdout: string,
+  counts: Record<string, number>,
+): boolean {
+  const text = normalizeStdout(stdout)
+  return Object.entries(counts).every(([needle, need]) => {
+    if (need <= 0) return true
+    let found = 0
+    let from = 0
+    while (found < need) {
+      const at = text.indexOf(needle, from)
+      if (at < 0) return false
+      found += 1
+      from = at + needle.length
+    }
+    return true
+  })
 }
 
 export function stdoutEqualsLines(
@@ -44,7 +65,7 @@ export function gradePython(
     if (!stdoutEqualsLines(stdout, challenge.stdoutLines)) {
       return {
         ok: false,
-        message: 'Almost — check what print showed. Listen to the briefing again if you need the target.',
+        message: 'Almost — check the Output panel and compare it to the task.',
       }
     }
   }
@@ -53,6 +74,14 @@ export function gradePython(
       return {
         ok: false,
         message: 'The program ran, but the message is not quite right yet.',
+      }
+    }
+  }
+  if (challenge.stdoutCounts) {
+    if (!stdoutMeetsCounts(stdout, challenge.stdoutCounts)) {
+      return {
+        ok: false,
+        message: 'Almost — your list needs each tile name the right number of times.',
       }
     }
   }
@@ -68,10 +97,10 @@ export function gradePython(
 export const PYTHON_CHALLENGES: Record<string, PythonChallenge> = {
   hello: {
     id: 'hello',
-    starter: `print("Hello, Basicbot!")
+    starter: `print("Hello, Python!")
 `,
-    hint: 'Use print with quotes around the words Hello, Basicbot!',
-    stdoutIncludes: ['Hello, Basicbot!'],
+    hint: 'Use print with quotes around the words Hello, Python!',
+    stdoutIncludes: ['Hello, Python!'],
   },
   variables: {
     id: 'variables',
@@ -100,6 +129,23 @@ else:
     hint: 'Use a for loop with range(4) and print the word forward each time.',
     stdoutLines: ['forward', 'forward', 'forward', 'forward'],
   },
+  memory: {
+    id: 'memory',
+    starter: `tiles = ["creeper", "chicken", "creeper", "chicken"]
+print(tiles)
+`,
+    hint: 'Make a list named tiles with creeper and chicken each listed twice, then print(tiles).',
+    stdoutCounts: { creeper: 2, chicken: 2 },
+  },
+  lists: {
+    id: 'lists',
+    starter: `chest = ["torch", "pick", "bread"]
+print(chest[0])
+print(len(chest))
+`,
+    hint: 'Print chest[0] for the first item, then print(len(chest)) for the count.',
+    stdoutLines: ['torch', '3'],
+  },
   drive: {
     id: 'drive',
     starter: `# The bot starts facing right.
@@ -113,12 +159,13 @@ forward(3)
     hint: 'Drive around the orange hazards and the wall block to the green flag.',
     mustReachGoal: true,
   },
-  sandbox: {
-    id: 'sandbox',
-    starter: `print("Workshop is open.")
-# Try: speed = 2
+  craft: {
+    id: 'craft',
+    starter: `print("Crafting table is open.")
+# Try: chest = ["torch", "pick"]
+# Try: for i in range(3):
+#         print("craft")
 # Try: forward(2)
-# Try: left()
 `,
     hint: 'Anything goes. Read the output after you run.',
   },
