@@ -10,6 +10,8 @@ export type PythonChallenge = {
   mustReachGoal?: boolean
   /** Exact stdout lines (trimmed), in order. */
   stdoutLines?: string[]
+  /** Soft pattern match (e.g. any Hello, Name greeting). */
+  stdoutMatch?: RegExp
 }
 
 export function normalizeStdout(stdout: string): string {
@@ -77,6 +79,14 @@ export function gradePython(
       }
     }
   }
+  if (challenge.stdoutMatch) {
+    if (!challenge.stdoutMatch.test(normalizeStdout(stdout))) {
+      return {
+        ok: false,
+        message: 'Almost — use print to say Hello, … with a name or word after the comma.',
+      }
+    }
+  }
   if (challenge.stdoutCounts) {
     if (!stdoutMeetsCounts(stdout, challenge.stdoutCounts)) {
       return {
@@ -99,8 +109,9 @@ export const PYTHON_CHALLENGES: Record<string, PythonChallenge> = {
     id: 'hello',
     starter: `print("Hello, Python!")
 `,
-    hint: 'Use print with quotes around the words Hello, Python!',
-    stdoutIncludes: ['Hello, Python!'],
+    hint: 'Use print("Hello, …") with quotes. Your name works too — like Hello, Kenneth!',
+    // Any greeting shaped like Hello, Name — not only the starter text.
+    stdoutMatch: /Hello,\s*\S+/i,
   },
   variables: {
     id: 'variables',

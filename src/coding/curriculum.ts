@@ -38,7 +38,7 @@ export const PYTHON_MISSIONS: Mission[] = [
       'print() shows words on the screen. Put the words in quotes inside the parentheses.',
       'Click Run. Your result shows in the Output panel under the code — that panel is the computer talking back.',
     ],
-    task: 'Run the code. Output should show: Hello, Python!',
+    task: 'Use print to say hello. Hello, Python! is fine — or Hello with your name.',
   },
   {
     id: 'variables',
