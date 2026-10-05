@@ -1,8 +1,10 @@
 .scratch-pad {
   width: 100%;
+  max-width: 100%;
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
+  flex: 0 0 auto;
 }
 
 .scratch-pad-top {

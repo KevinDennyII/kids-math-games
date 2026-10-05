@@ -23,7 +23,11 @@ export function ScratchPad({ resetKey, disabled }: Props) {
 
     const dpr = Math.min(window.devicePixelRatio || 1, 2)
     const width = parent.clientWidth
-    const height = Math.max(140, Math.round(width * 0.42))
+    const shortPhone = window.innerHeight < 720
+    const height = Math.max(
+      shortPhone ? 128 : 168,
+      Math.round(width * (shortPhone ? 0.36 : 0.48)),
+    )
 
     canvas.width = Math.round(width * dpr)
     canvas.height = Math.round(height * dpr)

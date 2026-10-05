@@ -20,7 +20,7 @@ type Props = {
   burstKey: number
   popPoints: number | null
   popKey: number
-  /** Show a draw-to-think pad (bigger race problems) */
+  /** Show a draw-to-think pad for working out problems */
   showScratchPad?: boolean
 }
 

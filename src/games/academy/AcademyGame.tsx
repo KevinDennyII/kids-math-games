@@ -117,6 +117,7 @@ export function AcademyGame() {
         burstKey={game.burstKey}
         popPoints={game.popPoints}
         popKey={game.popKey}
+        showScratchPad
       />
     </main>
   )

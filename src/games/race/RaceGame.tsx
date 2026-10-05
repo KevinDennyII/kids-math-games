@@ -107,9 +107,7 @@ export function RaceGame() {
         burstKey={game.burstKey}
         popPoints={game.popPoints}
         popKey={game.popKey}
-        showScratchPad={
-          game.problem.type === 'addition' || game.problem.layout === 'vertical'
-        }
+        showScratchPad
       />
     </main>
   )
