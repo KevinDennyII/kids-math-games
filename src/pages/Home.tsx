@@ -120,7 +120,7 @@ export function Home() {
             </div>
             <span className="cta-kicker">For him</span>
             <span className="cta-title">Racecar Math League</span>
-            <span className="cta-copy">Add, subtract, multiply, divide — pick your mix</span>
+            <span className="cta-copy">Add, subtract, multiply, divide, fractions — pick your mix</span>
           </Link>
           <Link className="home-cta academy-cta" to="/academy">
             <div className="cta-art cta-art-pets" aria-hidden="true">

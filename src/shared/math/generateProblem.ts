@@ -1,3 +1,9 @@
+import {
+  addFractions,
+  formatFraction,
+  lcm,
+  type Fraction,
+} from './fractions'
 import type {
   MathOp,
   MathOpLevels,
@@ -5,7 +11,7 @@ import type {
   Problem,
   ProblemIcon,
 } from './types'
-import { MATH_OPS, PROBLEM_ICON_LABELS } from './types'
+import { PROBLEM_ICON_LABELS, RACE_OPS } from './types'
 
 function randomInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min
@@ -19,16 +25,21 @@ function clampLevel(level: number): number {
   return Math.min(3, Math.max(1, level))
 }
 
-export function pickMixedOp(): MathOp {
-  return MATH_OPS[randomInt(0, MATH_OPS.length - 1)]!
+function pickFrom<T>(items: readonly T[]): T {
+  return items[randomInt(0, items.length - 1)]!
+}
+
+export function pickMixedOp(ops: readonly MathOp[] = RACE_OPS): MathOp {
+  return ops[randomInt(0, ops.length - 1)]!
 }
 
 export function generateMathProblem(
   generateOp: (op: MathOp, level: number) => Problem,
   mode: MathOpMode,
   opLevels: MathOpLevels,
+  mixedOps: readonly MathOp[] = RACE_OPS,
 ): Problem {
-  const op = mode === 'mixed' ? pickMixedOp() : mode
+  const op = mode === 'mixed' ? pickMixedOp(mixedOps) : mode
   return generateOp(op, opLevels[op])
 }
 
@@ -150,11 +161,102 @@ function generateRaceDivision(level: number): Problem {
   }
 }
 
+const SAME_DENS = [2, 3, 4, 5, 6, 8] as const
+const RELATED_PAIRS: ReadonlyArray<readonly [number, number]> = [
+  [2, 4],
+  [2, 6],
+  [2, 8],
+  [3, 6],
+  [3, 9],
+  [4, 8],
+  [5, 10],
+]
+const UNLIKE_DENS = [2, 3, 4, 5, 6, 8] as const
+
+function fractionProblem(
+  left: Fraction,
+  right: Fraction,
+  hint: string,
+): Problem {
+  const sum = addFractions(left, right)
+  const prompt = `${left.numerator}/${left.denominator} + ${right.numerator}/${right.denominator}`
+  return {
+    id: uid(),
+    type: 'fractions',
+    prompt,
+    answer: sum.numerator / sum.denominator,
+    hint,
+    fractionOperands: [left, right],
+    fractionAnswer: sum,
+  }
+}
+
+/** L1 same denom → L2 related dens → L3 unlike dens (LCD ≤ 24). */
+function generateRaceFractions(level: number): Problem {
+  if (level <= 1) {
+    const den = pickFrom(SAME_DENS)
+    const a = randomInt(1, den - 1)
+    const b = randomInt(1, den - 1)
+    const left = { numerator: a, denominator: den }
+    const right = { numerator: b, denominator: den }
+    return fractionProblem(
+      left,
+      right,
+      `Same bottom number — add the tops: ${a} + ${b} = ${a + b}, keep /${den}. Simplify if you can.`,
+    )
+  }
+
+  if (level === 2) {
+    const [small, big] = pickFrom(RELATED_PAIRS)
+    const left = {
+      numerator: randomInt(1, small - 1),
+      denominator: small,
+    }
+    const right = {
+      numerator: randomInt(1, big - 1),
+      denominator: big,
+    }
+    const sum = addFractions(left, right)
+    return fractionProblem(
+      left,
+      right,
+      `Rewrite ${formatFraction(left)} with /${big}, then add. Aim for ${formatFraction(sum)}.`,
+    )
+  }
+
+  let leftDen = pickFrom(UNLIKE_DENS)
+  let rightDen = pickFrom(UNLIKE_DENS)
+  for (let attempt = 0; attempt < 12; attempt++) {
+    leftDen = pickFrom(UNLIKE_DENS)
+    rightDen = pickFrom(UNLIKE_DENS)
+    if (leftDen !== rightDen && lcm(leftDen, rightDen) <= 24) break
+  }
+  if (leftDen === rightDen) {
+    rightDen = leftDen === 3 ? 4 : 3
+  }
+
+  const left = {
+    numerator: randomInt(1, leftDen - 1),
+    denominator: leftDen,
+  }
+  const right = {
+    numerator: randomInt(1, rightDen - 1),
+    denominator: rightDen,
+  }
+  const sum = addFractions(left, right)
+  return fractionProblem(
+    left,
+    right,
+    `Find a common bottom, add the tops, then simplify to ${formatFraction(sum)}.`,
+  )
+}
+
 export function generateRaceOpProblem(op: MathOp, level: number): Problem {
   const clamped = clampLevel(level)
   if (op === 'addition') return generateRaceAddition(clamped)
   if (op === 'subtraction') return generateRaceSubtraction(clamped)
   if (op === 'multiplication') return generateRaceMultiplication(clamped)
+  if (op === 'fractions') return generateRaceFractions(clamped)
   return generateRaceDivision(clamped)
 }
 
@@ -272,5 +374,10 @@ export function generateAcademyOpProblem(op: MathOp, level: number): Problem {
   if (op === 'addition') return generateAcademyAddition(clamped)
   if (op === 'subtraction') return generateAcademySubtraction(clamped)
   if (op === 'multiplication') return generateAcademyMultiplication(clamped)
+  if (op === 'fractions') {
+    // Fractions are Kenneth’s race track only — fall back if asked.
+    return generateAcademyAddition(clamped)
+  }
   return generateAcademyDivision(clamped)
 }
+

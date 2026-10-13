@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { MusicTheme } from '../audio/musicEngine'
 import { useGameMusic } from '../audio/useGameMusic'
+import { matchesFractionAnswer } from '../math/fractions'
 import { generateMathProblem } from '../math/generateProblem'
 import type { MathGameId, MathOp, Problem } from '../math/types'
+import { opsForGame } from '../math/types'
 import { useProgressStore } from '../store/progressStore'
 
 const CORRECT_DELAY_MS = 900
@@ -50,8 +52,14 @@ export function useAdaptiveProblemGame({
       subtraction: progress.ops.subtraction.level,
       multiplication: progress.ops.multiplication.level,
       division: progress.ops.division.level,
+      fractions: progress.ops.fractions.level,
     }
-    return generateMathProblem(generateOpProblem, progress.opMode, opLevels)
+    return generateMathProblem(
+      generateOpProblem,
+      progress.opMode,
+      opLevels,
+      opsForGame(gameId),
+    )
   }, [gameId, generateOpProblem])
 
   const [problem, setProblem] = useState<Problem>(() => makeProblem())
@@ -104,11 +112,16 @@ export function useAdaptiveProblemGame({
 
   const submit = useCallback(() => {
     if (locked || value === '') return
-    const guess = Number(value)
-    if (Number.isNaN(guess)) return
+    const correct = problem.fractionAnswer
+      ? matchesFractionAnswer(value, problem.fractionAnswer)
+      : (() => {
+          const guess = Number(value)
+          return !Number.isNaN(guess) && guess === problem.answer
+        })()
+    if (!problem.fractionAnswer && Number.isNaN(Number(value))) return
 
     setLocked(true)
-    const result = recordAnswer(gameId, guess === problem.answer, problem.type)
+    const result = recordAnswer(gameId, correct, problem.type)
 
     if (result.correct) {
       playSfx('correct')
@@ -131,6 +144,7 @@ export function useAdaptiveProblemGame({
     locked,
     playSfx,
     problem.answer,
+    problem.fractionAnswer,
     problem.hint,
     problem.type,
     recordAnswer,

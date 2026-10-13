@@ -73,7 +73,41 @@ function VerticalArithmetic({ problem }: { problem: Problem }) {
   )
 }
 
+function FractionGlyph({
+  numerator,
+  denominator,
+}: {
+  numerator: number
+  denominator: number
+}) {
+  return (
+    <span className="frac" aria-hidden="true">
+      <span className="frac-num">{numerator}</span>
+      <span className="frac-bar" />
+      <span className="frac-den">{denominator}</span>
+    </span>
+  )
+}
+
+function FractionPrompt({ problem }: { problem: Problem }) {
+  const [left, right] = problem.fractionOperands ?? []
+  if (!left || !right) {
+    return <p className="problem-prompt">{problem.prompt}</p>
+  }
+  return (
+    <div className="problem-prompt problem-prompt-fraction" aria-label={problem.prompt}>
+      <FractionGlyph numerator={left.numerator} denominator={left.denominator} />
+      <span className="prompt-op">+</span>
+      <FractionGlyph numerator={right.numerator} denominator={right.denominator} />
+    </div>
+  )
+}
+
 function VisualPrompt({ problem }: { problem: Problem }) {
+  if (problem.type === 'fractions') {
+    return <FractionPrompt problem={problem} />
+  }
+
   if (problem.layout === 'vertical' && problem.operands?.length === 2) {
     return <VerticalArithmetic problem={problem} />
   }
@@ -108,6 +142,8 @@ export function ProblemPanel({
 }: Props) {
   const inputRef = useRef<HTMLInputElement>(null)
 
+  const isFraction = problem.type === 'fractions'
+
   useEffect(() => {
     if (!disabled) {
       inputRef.current?.focus()
@@ -124,13 +160,21 @@ export function ProblemPanel({
         ref={inputRef}
         id="answer-input"
         className="problem-answer"
-        inputMode="numeric"
-        pattern="[0-9]*"
+        inputMode={isFraction ? 'text' : 'numeric'}
+        pattern={isFraction ? '[0-9/ ]*' : '[0-9]*'}
         autoComplete="off"
         enterKeyHint="done"
         value={value}
         disabled={disabled}
         onChange={(event) => {
+          if (isFraction) {
+            const next = event.target.value
+              .replace(/[^\d/\s]/g, '')
+              .replace(/\s+/g, ' ')
+              .slice(0, 9)
+            onChange(next)
+            return
+          }
           const next = event.target.value.replace(/\D/g, '').slice(0, 4)
           onChange(next)
         }}
@@ -140,8 +184,8 @@ export function ProblemPanel({
             onSubmit()
           }
         }}
-        placeholder="—"
-        aria-label="Your answer"
+        placeholder={isFraction ? 'n/d' : '—'}
+        aria-label={isFraction ? 'Your answer as a fraction' : 'Your answer'}
       />
       {hint ? <p className="problem-hint">{hint}</p> : null}
     </div>

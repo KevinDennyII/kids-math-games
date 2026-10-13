@@ -42,6 +42,14 @@
   font-size: var(--text-lg);
 }
 
+.number-pad-fraction .pad-go {
+  grid-column: 1 / -1;
+}
+
+.pad-slash {
+  font-size: var(--text-xl);
+}
+
 .pad-key:disabled {
   opacity: 0.55;
   cursor: not-allowed;

@@ -46,6 +46,7 @@ function mergeOps(persisted: Partial<MathOpProgress> | undefined): MathOpProgres
     subtraction: normalizeAdaptiveState(persisted.subtraction),
     multiplication: normalizeAdaptiveState(persisted.multiplication),
     division: normalizeAdaptiveState(persisted.division),
+    fractions: normalizeAdaptiveState(persisted.fractions),
   }
 }
 
@@ -78,7 +79,11 @@ function mergeMath(
       ),
     },
     academy: {
-      opMode: persisted.math?.academy?.opMode ?? current.academy.opMode,
+      opMode: (() => {
+        const mode = persisted.math?.academy?.opMode ?? current.academy.opMode
+        // Fractions are race-only (Kenneth); older/odd saves fall back.
+        return mode === 'fractions' ? 'addition' : mode
+      })(),
       ops: mergeOps({
         ...persisted.math?.academy?.ops,
         addition:

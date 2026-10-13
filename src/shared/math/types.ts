@@ -7,15 +7,22 @@ export type ProblemType =
   | 'multiplication'
   | 'division'
   | 'word-addition'
+  | 'fractions'
 
-export const MATH_OPS = [
+/** Core ops shared by both kids’ games. */
+export const ACADEMY_OPS = [
   'addition',
   'subtraction',
   'multiplication',
   'division',
 ] as const
 
-/** One independent math track shared by both kids’ games. */
+/** Kenneth’s race track also includes fraction addition. */
+export const RACE_OPS = [...ACADEMY_OPS, 'fractions'] as const
+
+export const MATH_OPS = RACE_OPS
+
+/** One independent math track. */
 export type MathOp = (typeof MATH_OPS)[number]
 export type MathOpMode = MathOp | 'mixed'
 export type MathOpLevels = Record<MathOp, number>
@@ -31,11 +38,17 @@ export const PROBLEM_ICON_LABELS: Record<ProblemIcon, string> = {
   fox: 'fox friends',
 }
 
+export type FractionParts = {
+  numerator: number
+  denominator: number
+}
+
 export interface Problem {
   id: string
   type: ProblemType
   /** Accessible text prompt (also used when no icons) */
   prompt: string
+  /** Integer answer for non-fraction problems. */
   answer: number
   hint: string
   operands?: number[]
@@ -43,6 +56,10 @@ export interface Problem {
   visualIcon?: ProblemIcon
   /** Stack operands (e.g. bigger multiplications) */
   layout?: 'horizontal' | 'vertical'
+  /** Fraction addition prompt parts */
+  fractionOperands?: [FractionParts, FractionParts]
+  /** Expected fraction (any equivalent form counts as correct) */
+  fractionAnswer?: FractionParts
 }
 
 export interface AdaptiveState {
@@ -94,7 +111,13 @@ export function normalizeAdaptiveState(
 
 export function mathOpFromProblemType(type: ProblemType): MathOp {
   if (type === 'word-addition') return 'addition'
-  if (type === 'addition' || type === 'subtraction' || type === 'multiplication' || type === 'division') {
+  if (
+    type === 'addition' ||
+    type === 'subtraction' ||
+    type === 'multiplication' ||
+    type === 'division' ||
+    type === 'fractions'
+  ) {
     return type
   }
   return 'addition'
@@ -106,6 +129,7 @@ export function createMathOpProgress(): MathOpProgress {
     subtraction: createAdaptiveState(),
     multiplication: createAdaptiveState(),
     division: createAdaptiveState(),
+    fractions: createAdaptiveState(),
   }
 }
 
@@ -121,4 +145,8 @@ export function createMathGameProgress(opMode: MathOpMode = 'mixed'): MathGamePr
     ops: createMathOpProgress(),
     mixed: createAdaptiveState(),
   }
+}
+
+export function opsForGame(game: MathGameId): readonly MathOp[] {
+  return game === 'race' ? RACE_OPS : ACADEMY_OPS
 }

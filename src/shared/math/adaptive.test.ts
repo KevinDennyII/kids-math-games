@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { applyAnswer, MATH_ADAPTIVE } from './adaptive'
+import { addFractions } from './fractions'
 import { createAdaptiveState } from './types'
 import { generateAcademyOpProblem, generateMathProblem, generateRaceOpProblem } from './generateProblem'
 import type { MathOpLevels } from './types'
@@ -225,13 +226,18 @@ describe('problem generators', () => {
       subtraction: 1,
       multiplication: 3,
       division: 1,
+      fractions: 1,
     }
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 120; i++) {
       const p = generateMathProblem(generateRaceOpProblem, 'mixed', opLevels)
       types.add(p.type)
-      expect(['addition', 'subtraction', 'multiplication', 'division']).toContain(
-        p.type,
-      )
+      expect([
+        'addition',
+        'subtraction',
+        'multiplication',
+        'division',
+        'fractions',
+      ]).toContain(p.type)
       if (p.type === 'division') {
         expect(p.operands![0]).toBeLessThanOrEqual(25)
       }
@@ -240,6 +246,7 @@ describe('problem generators', () => {
     expect(types.has('subtraction')).toBe(true)
     expect(types.has('multiplication')).toBe(true)
     expect(types.has('division')).toBe(true)
+    expect(types.has('fractions')).toBe(true)
   })
 
   it('race dedicated mode ignores other operations’ levels', () => {
@@ -248,9 +255,28 @@ describe('problem generators', () => {
       subtraction: 3,
       multiplication: 3,
       division: 1,
+      fractions: 3,
     })
     expect(p.type).toBe('division')
     expect(p.operands![0]).toBeLessThanOrEqual(25)
+  })
+
+  it('race fraction addition matches the sum and stays kid-sized', () => {
+    for (let level = 1; level <= 3; level++) {
+      for (let i = 0; i < 30; i++) {
+        const p = generateRaceOpProblem('fractions', level)
+        expect(p.type).toBe('fractions')
+        expect(p.fractionOperands).toHaveLength(2)
+        expect(p.fractionAnswer).toBeTruthy()
+        const [left, right] = p.fractionOperands!
+        const expected = addFractions(left!, right!)
+        expect(p.fractionAnswer).toEqual(expected)
+        expect(expected.denominator).toBeLessThanOrEqual(24)
+        if (level <= 1) {
+          expect(left!.denominator).toBe(right!.denominator)
+        }
+      }
+    }
   })
 
   it('academy L1 sums stay within 10', () => {

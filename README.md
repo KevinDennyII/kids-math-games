@@ -2,8 +2,8 @@
 
 Math and typing games on **dennymathgames.online**. Python Lab is on **coding.dennymathgames.online**. Brain Games is on **braingames.dennymathgames.online**. Same Netlify deploy, different hostnames.
 
-- **Racecar Math League** (`/race`) — addition, subtraction, multiplication, and division with independent levels (ages 8+)
-- **Magical Math Academy** (`/academy`) — the same four operations with gentler independent levels (ages 6+)
+- **Racecar Math League** (`/race`) — addition, subtraction, multiplication, division, and fraction addition with independent levels (ages 8+)
+- **Magical Math Academy** (`/academy`) — addition, subtraction, multiplication, and division with gentler independent levels (ages 6+)
 - **It’s TIME!** (`/clock`) — analog clock reading & setting that blends race + pet themes (both kids). Optional hands-on tutorial, then scaffolds o’clock → half past → quarters → count-by-5s with read and set modes.
 - **Fox Rockets** (`/typing`) — shared falling-words typing for both kids
 

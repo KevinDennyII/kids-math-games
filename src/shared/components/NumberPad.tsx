@@ -6,32 +6,54 @@ type Props = {
   onChange: (next: string) => void
   onSubmit: () => void
   disabled?: boolean
+  /** Allow a slash key for fraction answers (n/d). */
+  allowFraction?: boolean
 }
 
-const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'clear', '0', 'go'] as const
+const KEYS_NUMBER = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'clear', '0', 'go'] as const
+const KEYS_FRACTION = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '/', '0', 'clear', 'go'] as const
 const MAX_DIGITS = 4
+const MAX_FRACTION_CHARS = 7
 
-export function NumberPad({ value, onChange, onSubmit, disabled }: Props) {
+export function NumberPad({
+  value,
+  onChange,
+  onSubmit,
+  disabled,
+  allowFraction = false,
+}: Props) {
   const valueRef = useRef(value)
   const disabledRef = useRef(disabled)
   const onChangeRef = useRef(onChange)
   const onSubmitRef = useRef(onSubmit)
+  const allowFractionRef = useRef(allowFraction)
   valueRef.current = value
   disabledRef.current = disabled
   onChangeRef.current = onChange
   onSubmitRef.current = onSubmit
+  allowFractionRef.current = allowFraction
 
-  const press = useCallback((key: (typeof KEYS)[number]) => {
+  const keys = allowFraction ? KEYS_FRACTION : KEYS_NUMBER
+
+  const press = useCallback((key: string) => {
     if (disabledRef.current) return
     if (key === 'clear') {
-      onChangeRef.current('')
+      onChangeRef.current(valueRef.current.slice(0, -1))
       return
     }
     if (key === 'go') {
       onSubmitRef.current()
       return
     }
-    if (valueRef.current.length >= MAX_DIGITS) return
+    if (key === '/') {
+      if (!allowFractionRef.current) return
+      if (valueRef.current.includes('/')) return
+      if (valueRef.current.length === 0) return
+      onChangeRef.current(`${valueRef.current}/`)
+      return
+    }
+    const max = allowFractionRef.current ? MAX_FRACTION_CHARS : MAX_DIGITS
+    if (valueRef.current.length >= max) return
     onChangeRef.current(valueRef.current + key)
   }, [])
 
@@ -56,7 +78,13 @@ export function NumberPad({ value, onChange, onSubmit, disabled }: Props) {
 
       if (/^[0-9]$/.test(event.key)) {
         event.preventDefault()
-        press(event.key as (typeof KEYS)[number])
+        press(event.key)
+        return
+      }
+
+      if (event.key === '/' && allowFractionRef.current) {
+        event.preventDefault()
+        press('/')
         return
       }
 
@@ -77,12 +105,16 @@ export function NumberPad({ value, onChange, onSubmit, disabled }: Props) {
   }, [press])
 
   return (
-    <div className="number-pad" role="group" aria-label="Number pad">
-      {KEYS.map((key) => (
+    <div
+      className={`number-pad ${allowFraction ? 'number-pad-fraction' : ''}`}
+      role="group"
+      aria-label="Number pad"
+    >
+      {keys.map((key) => (
         <button
           key={key}
           type="button"
-          className={`pad-key ${key === 'go' ? 'pad-go' : ''} ${key === 'clear' ? 'pad-clear' : ''}`}
+          className={`pad-key ${key === 'go' ? 'pad-go' : ''} ${key === 'clear' ? 'pad-clear' : ''} ${key === '/' ? 'pad-slash' : ''}`}
           onPointerDown={(event) => {
             event.preventDefault()
             press(key)

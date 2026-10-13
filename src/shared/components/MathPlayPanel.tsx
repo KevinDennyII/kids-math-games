@@ -64,6 +64,7 @@ export function MathPlayPanel({
         onChange={onChange}
         onSubmit={onSubmit}
         disabled={locked}
+        allowFraction={problem.type === 'fractions'}
       />
     </section>
   )

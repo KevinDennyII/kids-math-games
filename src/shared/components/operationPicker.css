@@ -6,6 +6,11 @@
   gap: 0.45rem;
 }
 
+.op-picker-race {
+  width: min(100%, 680px);
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
 .op-picker-btn {
   display: flex;
   flex-direction: column;
@@ -57,7 +62,8 @@
 }
 
 @media (max-width: 560px) {
-  .op-picker {
+  .op-picker,
+  .op-picker-race {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
